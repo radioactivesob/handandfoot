@@ -253,16 +253,29 @@ is the detail that makes the app feel like it was built by someone who plays.
 
 Same economics as the siblings: **cloud builds are a limited monthly resource**
 on the EAS free tier, and this is a hobby project that will not pay for more.
-Build locally, which does not draw down the quota:
+So batch changes and build when there is a release to make.
 
 ```bash
 npx expo-doctor                                       # before every build
-npx eas build --platform ios --profile production --local
-npx eas submit --platform ios --path <the .ipa>
+npx eas build --platform ios --profile production --non-interactive
+npx eas submit --platform ios --latest --non-interactive
 ```
 
-Local builds need the working Xcode toolchain and `LANG`/`LC_ALL` set to a
-UTF-8 locale, or CocoaPods crashes with an error 65 that points nowhere useful.
+**`--local` does not work on this Mac** (found Sept 2026, first build attempt).
+It needs **Fastlane** on the `PATH`, which is not installed, and it fails with
+`spawn fastlane ENOENT` only *after* it has finished the whole credentials
+dance — so the failure looks far more alarming than it is and none of the
+credential work is lost. `eas.json` also pins Node 22.23.1 while this machine
+runs 20.20.2, which `--local` warns about and the cloud builder simply honours.
+
+This matters because **Crosscourt's `DESIGN.md` recommends `--local` as the
+quota-saving path and that advice does not currently work.** Either install
+Fastlane (`brew install fastlane`) or treat cloud builds as the only route on
+this machine.
+
+Local builds, if Fastlane is ever installed, still need the working Xcode
+toolchain and `LANG`/`LC_ALL` set to a UTF-8 locale, or CocoaPods crashes with
+an error 65 that points nowhere useful.
 
 Two things need an **interactive Apple login** and so cannot be automated:
 registering the new `com.handandfoot.scorer` App ID with Apple on the first
