@@ -30,8 +30,18 @@ against hand-computed rounds — including go-out disabled, a positive red three
 and a tie. No test runner: the domain file imports nothing, so `tsc` plus
 `node` is the whole harness.
 
-Not done: an icon and splash (running on Expo's defaults), the JPEG share card
-— text and PDF only so far — and no build has left this machine.
+**Icon and splash done** (Sept 2026): two overlapping cards — the hand and the
+foot — on felt, the front one a red three, which is the rule that hurts most.
+Source in `assets/icon-source.svg`, re-export with `rsvg-convert`. The splash
+background is `#0C2018`, the same value as `theme.ts` and the icon ground, so
+launch flows into the app without a seam.
+
+**EAS project linked**: `@radioactivesob/handandfoot`, id
+`dd8d0420-0176-4c30-abb4-0a701ae94319`. `npx expo-doctor` passes 21/21 and
+`npx expo export --platform ios` produces a clean 2.5 MB Hermes bundle.
+
+Not done: the JPEG share card — text and PDF only so far — and **no build has
+left this machine**. Nothing is signed, and no App Store Connect record exists.
 
 **Text entry has not been tested with the software keyboard.** The simulator
 connects the hardware keyboard by default, so no on-screen keyboard ever
@@ -235,11 +245,44 @@ is the detail that makes the app feel like it was built by someone who plays.
   blocked only by the fixed setup screen. Unblock it when someone asks.
 - **Deck count** scales with player count and the app currently says nothing
   about it. A line on the setup screen would be a nice touch; it is not scoring.
-- **No icon or splash yet** — `app.json` deliberately omits them rather than
-  pointing at files that don't exist, which fails prebuild outright.
 - **The JPEG share card** from the design is not built; export is PDF and
   plain text. Text is arguably the better group-chat artifact anyway, so the
   card may not be worth it — decide after one real game.
+
+## Builds
+
+Same economics as the siblings: **cloud builds are a limited monthly resource**
+on the EAS free tier, and this is a hobby project that will not pay for more.
+Build locally, which does not draw down the quota:
+
+```bash
+npx expo-doctor                                       # before every build
+npx eas build --platform ios --profile production --local
+npx eas submit --platform ios --path <the .ipa>
+```
+
+Local builds need the working Xcode toolchain and `LANG`/`LC_ALL` set to a
+UTF-8 locale, or CocoaPods crashes with an error 65 that points nowhere useful.
+
+Two things need an **interactive Apple login** and so cannot be automated:
+registering the new `com.handandfoot.scorer` App ID with Apple on the first
+build, and creating the App Store Connect record on the first submit.
+
+**App Store names are globally unique.** Crosscourt learned this the hard way —
+`eas submit` created its record as "Crosscourt (957e5a)" and it had to be
+renamed. "Hand & Foot" is a common phrase and will almost certainly collide, so
+expect a suffixed record name on the first submit. It only matters for the
+store listing; `CFBundleDisplayName` is a separate field and the home-screen
+name stays "Hand & Foot" regardless.
+
+**`expo run:ios` does NOT re-run prebuild when `ios/` already exists**, so an
+`app.json` change silently fails to reach `Info.plist`. After editing it:
+
+```bash
+npx expo prebuild --platform ios --clean
+```
+
+`/ios` is gitignored and fully generated, so `--clean` loses nothing.
 
 ## Conventions (inherited)
 

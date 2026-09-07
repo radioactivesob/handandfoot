@@ -42,3 +42,6 @@ yarn-error.*
 
 # scoring test build output
 .scoring-build/
+
+# expo export output
+dist/

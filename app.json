@@ -37,7 +37,11 @@
       ]
     ],
     "extra": {
-      "router": {}
-    }
+      "router": {},
+      "eas": {
+        "projectId": "dd8d0420-0176-4c30-abb4-0a701ae94319"
+      }
+    },
+    "owner": "radioactivesob"
   }
 }
