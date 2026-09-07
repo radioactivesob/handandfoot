@@ -334,6 +334,36 @@ expect a suffixed record name on the first submit. It only matters for the
 store listing; `CFBundleDisplayName` is a separate field and the home-screen
 name stays "Hand & Foot" regardless.
 
+**`expo-dev-client` is installed, and it is debug-only.** Added Sept 2026. Two
+reasons, one of them earned the hard way:
+
+- The dev launcher lets you pick **which Metro server** the app connects to.
+  All three sibling apps default Metro to port 8081, and a stale server from
+  one project will happily hand its bundle to another project's dev build —
+  which presents as the wrong app's UI with all its data missing, and looks
+  exactly like data loss. See [[metro-port-collision-between-siblings]].
+- It silences EAS's "your app uses Expo Go" warning on production builds.
+
+That warning was always a false positive here. EAS fires it when the profile is
+named `production`, `expo-dev-client` is absent, **and** no `ios/`/`android/`
+directory exists *or they are git-ignored*. `/ios` is git-ignored on purpose —
+it is generated, and ignoring it is what makes EAS run prebuild cloud-side from
+`app.json` — so EAS could not see the native project and inferred Expo Go. The
+app was never built or run through Expo Go; `expo run:ios` compiles the real
+native app. Do **not** un-ignore `/ios` to silence the warning.
+
+Verified rather than assumed, since the SDK 57 docs do not state it: the dev
+launcher is excluded from release builds. Comparing the generated xcconfigs,
+`OTHER_LDFLAGS` links `expo-dev-launcher` and `expo-dev-menu` in **Debug** only;
+**Release** links just `expo-dev-menu-interface`, a small interface shim. So it
+costs nothing in a TestFlight or App Store build.
+
+```bash
+# the check, if it ever needs repeating
+grep ^OTHER_LDFLAGS "ios/Pods/Target Support Files/Pods-HandFoot/Pods-HandFoot.release.xcconfig" \
+  | tr ' ' '\n' | grep -i dev-
+```
+
 **`expo run:ios` does NOT re-run prebuild when `ios/` already exists**, so an
 `app.json` change silently fails to reach `Info.plist`. After editing it:
 
