@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" viewBox="0 0 1024 1024">
+  <!-- Felt ground, the same #0C2018 as theme.ts and the splash, so launch
+       flows into the app without a seam. -->
+  <rect width="1024" height="1024" fill="#0C2018"/>
+  <g transform="translate(512,520)">
+    <!-- Back card: the foot, waiting. -->
+    <g transform="rotate(-15)">
+      <rect x="-290" y="-330" width="380" height="530" rx="34"
+            fill="#C4B79B" stroke="#8A6A2A" stroke-width="10"/>
+    </g>
+    <!-- Front card: the hand, and the red three that ruins your night. -->
+    <g transform="rotate(8) translate(60,20)">
+      <rect x="-200" y="-330" width="380" height="530" rx="34"
+            fill="#F4EBD9" stroke="#D9A441" stroke-width="12"/>
+      <text x="-10" y="-30" font-family="Helvetica-Bold, Helvetica, Arial, sans-serif"
+            font-size="300" font-weight="bold" fill="#C1352F" text-anchor="middle">3</text>
+      <g transform="translate(-10,110) scale(0.62)" fill="#C1352F">
+        <path d="M 0,-28 C -30,-72 -82,-40 -82,2 C -82,44 -30,64 0,100 C 30,64 82,44 82,2 C 82,-40 30,-72 0,-28 Z"/>
+      </g>
+    </g>
+  </g>
+</svg>

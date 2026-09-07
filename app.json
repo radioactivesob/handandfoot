@@ -1,0 +1,43 @@
+{
+  "expo": {
+    "name": "Hand & Foot",
+    "slug": "handandfoot",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "dark",
+    "scheme": "handandfoot",
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.handandfoot.scorer",
+      "infoPlist": {
+        "ITSAppUsesNonExemptEncryption": false
+      }
+    },
+    "android": {
+      "package": "com.handandfoot.scorer",
+      "predictiveBackGestureEnabled": false,
+      "adaptiveIcon": {
+        "backgroundColor": "#0C2018",
+        "foregroundImage": "./assets/android-icon-foreground.png"
+      }
+    },
+    "plugins": [
+      "expo-router",
+      "expo-sharing",
+      "expo-status-bar",
+      [
+        "expo-splash-screen",
+        {
+          "image": "./assets/splash-icon.png",
+          "backgroundColor": "#0C2018",
+          "resizeMode": "contain",
+          "imageWidth": 220
+        }
+      ]
+    ],
+    "extra": {
+      "router": {}
+    }
+  }
+}
