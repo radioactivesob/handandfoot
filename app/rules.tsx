@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { View, StyleSheet, TouchableOpacity, SafeAreaView, ScrollView, Switch } from 'react-native';
-import { Text, TextInput } from '../components/AppText';
+import { Text, TextInput, BODY_FONT_SCALE } from '../components/AppText';
 import { useRouter } from 'expo-router';
 import { useGames } from '../hooks/useGames';
 import { RuleSet, DEFAULT_RULES } from '../hooks/scoring';
@@ -40,7 +40,7 @@ function NumberRow({
 
 export default function Rules() {
   const router = useRouter();
-  const { rules, saveRules, current } = useGames();
+  const { rules, saveRules, current, prefs, savePrefs } = useGames();
   const [draft, setDraft] = useState<RuleSet | null>(null);
   const r = draft ?? rules;
 
@@ -68,6 +68,33 @@ export default function Rules() {
             Changes apply to the <Text style={styles.noticeBold}>next</Text> game.
             {current ? ' The game in progress keeps the rules it was dealt under.' : ''}
           </Text>
+        </View>
+
+        {/* A preference, not a rule — it changes how numbers get entered,
+            never what they are worth, so it is not frozen onto a game. */}
+        <Text style={styles.section}>HOW YOU COUNT</Text>
+        <View style={styles.modeRow}>
+          {([
+            ['endOfRound', 'At the end', 'Type the totals off the piles once the round is over.'],
+            ['asYouGo', 'As you play', 'Tap a tile each time a book goes down.'],
+          ] as const).map(([key, title, blurb]) => {
+            const on = prefs.scoringMode === key;
+            return (
+              <TouchableOpacity
+                key={key}
+                style={[styles.modeCard, on && styles.modeCardOn]}
+                onPress={() => savePrefs({ ...prefs, scoringMode: key })}
+              >
+                <Text
+                  style={[styles.modeTitle, on && styles.modeTitleOn]}
+                  maxFontSizeMultiplier={BODY_FONT_SCALE}
+                >
+                  {on ? '✓ ' : ''}{title}
+                </Text>
+                <Text style={styles.modeBlurb} maxFontSizeMultiplier={BODY_FONT_SCALE}>{blurb}</Text>
+              </TouchableOpacity>
+            );
+          })}
         </View>
 
         <Text style={styles.section}>ROUND MINIMUMS</Text>
@@ -162,15 +189,24 @@ const styles = StyleSheet.create({
     backgroundColor: C.surface, borderRadius: 12, borderWidth: 1,
     borderColor: C.brassDim, padding: 12, marginBottom: 8,
   },
-  noticeText: { color: C.textDim, fontSize: 13, lineHeight: 19 },
+  noticeText: { color: C.textDim, fontSize: 15, lineHeight: 22 },
+  modeRow: { gap: 8, marginTop: 4 },
+  modeCard: {
+    backgroundColor: C.surface, borderRadius: 12, borderWidth: 1,
+    borderColor: C.border, padding: 14,
+  },
+  modeCardOn: { borderColor: C.brass, backgroundColor: C.surfaceRaised },
+  modeTitle: { color: C.textDim, fontSize: 16, fontWeight: '800' },
+  modeTitleOn: { color: C.brass },
+  modeBlurb: { color: C.textMuted, fontSize: 13, lineHeight: 19, marginTop: 3 },
   noticeBold: { color: C.brass, fontWeight: '800' },
   section: { color: C.brassMuted, fontSize: 11, fontWeight: '800', letterSpacing: 1.4, marginTop: 22, marginBottom: 4 },
   row: {
     flexDirection: 'row', alignItems: 'center', gap: 12,
     paddingVertical: 11, borderBottomWidth: 1, borderBottomColor: C.border,
   },
-  rowLabel: { color: C.text, fontSize: 15 },
-  rowHelp: { color: C.textMuted, fontSize: 12, marginTop: 2 },
+  rowLabel: { color: C.text, fontSize: 16 },
+  rowHelp: { color: C.textMuted, fontSize: 13, lineHeight: 18, marginTop: 2 },
   numInput: {
     minWidth: 88, textAlign: 'right', color: C.brass, fontSize: 19, fontWeight: '800',
     backgroundColor: C.surface, borderRadius: 10, borderWidth: 1, borderColor: C.border,

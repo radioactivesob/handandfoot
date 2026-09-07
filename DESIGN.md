@@ -177,27 +177,73 @@ nobody played by. Each `Game` carries its own frozen `RuleSet`, and the rules
 screen edits the defaults for the *next* game. Same lesson as Crosscourt's
 `GameEntry.sets`: record it, don't re-derive it.
 
-**The flip is for choices, not for counts.** The rotate-to-reveal treatment
-earns its place where a genuine one-of-N pick exists — a BOOK tile that turns to
-offer clean / dirty is a good use. It does not belong on the value counters,
-which are high-volume repeat taps under four people's attention; an animation
-that has to settle before the next tap lands is how a 400 becomes a 350. RN's
-built-in `Animated` does a `rotateY` without a new dependency, which matters:
-`AppText` caps Dynamic Type at 1.3×, and animated tiles plus scaled text is
-where fixed-height layouts break.
+**Two ways to count, and the table picks one.** Revised Sept 2026 after the
+first real look at the app. The original design assumed you score as you play —
+a tile tap per book, per card. The family counts the piles **once, at the end of
+the round**, which makes tap-counting actively bad: thirty five-point cards is
+thirty taps while three people wait. So `endOfRound` is the default and
+`asYouGo` is a preference.
 
-**One team at a time, and nothing commits until the round advances.** The full
-pad — four melded counters, two book counters, red threes, go-out, and the
-in-hand counters — does not fit on a phone twice over. Round entry is the same
-screen shown once per team, with the persistent scoreboard on top throughout.
-Both teams' numbers are held and written together when the round advances, so
-any correction before that is a tap, not an undo.
+This is a **preference, not a rule** — it changes how numbers are entered, never
+what they are worth. So it lives outside `RuleSet` and is deliberately *not*
+frozen onto a game: someone will want to switch halfway through, and nothing
+about the scoring stops them.
 
-**Melded and in-hand are two separate pads, not one pad with a sign toggle.**
+**End-of-round entry is typed, not tapped.** A number field with steppers either
+side: type `30`, or nudge ±1 when correcting. The steppers stay because a
+correction is almost always one card and summoning a keyboard for that is worse
+than the tap it replaces.
+
+**One panel per team, and it stays turned over.** This is the treatment from
+Hardwoods' scorebook — a panel you open and fill in. Tap a team's panel, it
+turns over, and everything that team scored this round is on the back: books,
+what is on the table, what they got caught holding. It stays turned until DONE.
+A panel that flipped back after each entry would be unusable, which is the
+mistake the first version made by putting the flip on a *counter*.
+
+The flip still belongs only where you are making a choice or opening a form —
+never on a control you hit repeatedly. That original instinct was right; it was
+attached to the wrong control.
+
+The panel swaps faces at the halfway point of the rotation rather than stacking
+two absolutely-positioned faces. That costs a line of timing code and buys a
+panel whose height follows its own content, which matters because the back is
+roughly six times taller than the front and both have to grow again when
+someone turns their phone's text size up.
+
+**Row labels come from the rules, not from the code.** The panel names each
+denomination with the ranks that earn it — "Joker", "Deuce, Ace", "10 – King",
+"4 – 9, Black three" — derived from `cardValues` by grouping on value. A house
+that plays 8s and 9s as ten-pointers sees "8 – King" on the ten row without a
+code change. This is the payoff for keeping the rank-to-value mapping as
+configuration; it was reference-only until the panels needed to call a row
+something a person would recognise at a card table.
+
+**Nothing commits until the round advances.** Both teams' numbers are held in a
+`draft` on the game and written together when the round is saved, so any
+correction before that is an edit, not an undo. In `endOfRound` mode both team
+panels sit on one screen, closed, with the running round score on each face —
+one is open at a time. In `asYouGo` mode the tap pad is shown one team at a
+time, because the full pad does not fit on a phone twice over.
+
+**Cards left in hand start folded away.** Usually one team goes out and only the
+other is holding anything, so showing four zero fields to everybody every round
+is noise. It opens on a tap, and stays open on its own whenever the count is
+non-zero.
+
+**Melded and in-hand are two separate sections, not one with a sign toggle.**
 They use the same four denominations and differ only in sign, which is precisely
 why a mode switch is dangerous — entering 200 melded points into the penalty
-column is a 400-point swing and looks completely plausible on screen. The
-in-hand pad is styled in the danger palette and sits below a rule.
+column is a 400-point swing and looks completely plausible on screen. In-hand is
+styled in the danger palette, sits below a rule, and is folded away by default.
+
+**Dynamic Type is capped at 1.3× for grids and 2.4× for prose.** The 1.3 cap
+came over from Crosscourt to stop 3× accessibility text shattering dense
+fixed-height layouts, and for a tap grid it is right. Applying it to a rules
+summary is just making text small for no reason — a 13px line reaches 17px at
+iOS's largest setting, which is not what someone who has turned their phone's
+text all the way up is expecting. `BODY_FONT_SCALE` is the opt-in for anything
+that sits in a scroll view and can simply get taller.
 
 **Export is two artifacts.** A JPEG card is what actually gets sent, because it
 lands in the family group text as an image instead of an attachment nobody

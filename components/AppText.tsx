@@ -17,6 +17,17 @@ export const MAX_FONT_SCALE = 1.3;
 // content, the same tradeoff Apple's own nav bars make.
 export const HEADER_FONT_SCALE = 1.1;
 
+// Prose and reference text — the rules summary, help copy, anything that sits
+// in a scroll view and can simply get taller. The 1.3 cap above exists to
+// protect dense fixed-height grids; applying it to a paragraph is just making
+// text small for no reason. Pass this as maxFontSizeMultiplier to opt in;
+// props spread after the default, so it wins.
+//
+// This matters more than it looks: capped at 1.3, a 13px line reaches 17px at
+// iOS's largest accessibility setting, which is not what someone who has
+// turned their phone's text all the way up is expecting.
+export const BODY_FONT_SCALE = 2.4;
+
 export const Text = forwardRef<RNText, TextProps>((props, ref) => (
   <RNText maxFontSizeMultiplier={MAX_FONT_SCALE} {...props} ref={ref} />
 ));

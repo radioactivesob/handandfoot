@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { View, StyleSheet, TouchableOpacity, SafeAreaView, ScrollView, Alert } from 'react-native';
-import { Text, TextInput } from '../components/AppText';
+import { Text, TextInput, BODY_FONT_SCALE } from '../components/AppText';
 import { useRouter } from 'expo-router';
 import { useGames, newId } from '../hooks/useGames';
 import { Game, roundCount } from '../hooks/scoring';
@@ -67,7 +67,7 @@ export default function Setup() {
       </View>
 
       <ScrollView contentContainerStyle={styles.body} keyboardDismissMode="on-drag">
-        <Text style={styles.note}>
+        <Text style={styles.note} maxFontSizeMultiplier={BODY_FONT_SCALE}>
           Partners sit across from each other — seats 1 &amp; 3 are one team,
           2 &amp; 4 are the other.
         </Text>
@@ -110,18 +110,23 @@ export default function Setup() {
         )}
 
         <View style={styles.rulesCard}>
-          <Text style={styles.rulesTitle}>PLAYING BY</Text>
-          <Text style={styles.rulesLine}>
+          <Text style={styles.rulesTitle} maxFontSizeMultiplier={BODY_FONT_SCALE}>PLAYING BY</Text>
+          <Text style={styles.rulesLine} maxFontSizeMultiplier={BODY_FONT_SCALE}>
             {roundCount(rules)} rounds · {rules.roundMinimums.join(' / ')}
           </Text>
-          <Text style={styles.rulesLine}>
-            Clean {rules.cleanBook} · Dirty {rules.dirtyBook} · Red three {rules.redThree}
+          <Text style={styles.rulesLine} maxFontSizeMultiplier={BODY_FONT_SCALE}>
+            Clean book {rules.cleanBook} · Dirty book {rules.dirtyBook}
           </Text>
-          <Text style={styles.rulesLine}>
-            Perfect deal +{rules.perfectDeal} · Go out {rules.goOutEnabled ? `+${rules.goOut}` : 'off'}
+          <Text style={styles.rulesLine} maxFontSizeMultiplier={BODY_FONT_SCALE}>
+            Red three {rules.redThree} · Perfect deal +{rules.perfectDeal}
+          </Text>
+          <Text style={styles.rulesLine} maxFontSizeMultiplier={BODY_FONT_SCALE}>
+            Go out {rules.goOutEnabled ? `+${rules.goOut}` : 'not played'}
           </Text>
           <TouchableOpacity onPress={() => router.push('/rules')}>
-            <Text style={styles.rulesEdit}>CHANGE HOUSE RULES →</Text>
+            <Text style={styles.rulesEdit} maxFontSizeMultiplier={BODY_FONT_SCALE}>
+              CHANGE HOUSE RULES →
+            </Text>
           </TouchableOpacity>
         </View>
       </ScrollView>
@@ -145,9 +150,9 @@ const styles = StyleSheet.create({
   back: { color: C.textDim, fontSize: 13, fontWeight: '800', letterSpacing: 1 },
   headerTitle: { color: C.text, fontSize: 15, fontWeight: '800', letterSpacing: 1.4 },
   body: { padding: 16, gap: 10, paddingBottom: 28 },
-  note: { color: C.textMuted, fontSize: 13, marginBottom: 4 },
+  note: { color: C.textMuted, fontSize: 15, lineHeight: 21, marginBottom: 4 },
   seatRow: { flexDirection: 'row', alignItems: 'center', gap: 10 },
-  seatTag: { fontSize: 10, fontWeight: '800', letterSpacing: 1, width: 54 },
+  seatTag: { fontSize: 11, fontWeight: '800', letterSpacing: 1, width: 58 },
   seatTagA: { color: C.brass },
   seatTagB: { color: C.good },
   input: {
@@ -165,11 +170,11 @@ const styles = StyleSheet.create({
   chipTextOn: { color: C.brass },
   rulesCard: {
     backgroundColor: C.surface, borderRadius: 14, borderWidth: 1,
-    borderColor: C.border, padding: 14, gap: 3, marginTop: 14,
+    borderColor: C.border, padding: 16, gap: 2, marginTop: 14,
   },
-  rulesTitle: { color: C.brassMuted, fontSize: 11, fontWeight: '800', letterSpacing: 1.4 },
-  rulesLine: { color: C.textDim, fontSize: 13 },
-  rulesEdit: { color: C.brass, fontSize: 12, fontWeight: '800', letterSpacing: 1, paddingTop: 8 },
+  rulesTitle: { color: C.brassMuted, fontSize: 13, fontWeight: '800', letterSpacing: 1.4, marginBottom: 2 },
+  rulesLine: { color: C.textDim, fontSize: 16, lineHeight: 24 },
+  rulesEdit: { color: C.brass, fontSize: 14, fontWeight: '800', letterSpacing: 1, paddingTop: 12 },
   bottomBar: {
     padding: 12, borderTopWidth: 1, borderTopColor: C.border, backgroundColor: C.surface,
   },

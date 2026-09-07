@@ -81,9 +81,9 @@ export default function Home() {
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: C.bg },
   body: { padding: 16, gap: 12 },
-  masthead: { paddingTop: 24, paddingBottom: 12 },
-  wordmark: { color: C.brass, fontSize: 40, fontWeight: '800', letterSpacing: 1 },
-  tagline: { color: C.textMuted, fontSize: 14, marginTop: 4 },
+  masthead: { paddingTop: 24, paddingBottom: 12, alignItems: 'center' },
+  wordmark: { color: C.brass, fontSize: 40, fontWeight: '800', letterSpacing: 1, textAlign: 'center' },
+  tagline: { color: C.textMuted, fontSize: 14, marginTop: 4, textAlign: 'center' },
   card: {
     flexDirection: 'row', alignItems: 'center', gap: 14,
     backgroundColor: C.surface, borderRadius: 16, borderWidth: 1,

@@ -94,6 +94,20 @@ export const DEFAULT_RULES: RuleSet = {
 
 export const roundCount = (r: RuleSet): number => r.roundMinimums.length;
 
+/**
+ * What to call a denomination at the table.
+ *
+ * Derived from `cardValues` rather than hard-coded, so the labels follow the
+ * house rules: a house that plays 8s and 9s as ten-pointers sees "8 – King"
+ * on the ten row without a code change. This is the payoff for keeping the
+ * rank-to-value mapping as configuration — it was reference-only until the
+ * scoring panels needed to name a row something a person would recognise.
+ */
+export function denominationLabel(r: RuleSet, d: Denomination): string {
+  const names = r.cardValues.filter(cv => cv.value === d).map(cv => cv.label);
+  return names.length > 0 ? names.join(', ') : `${d}-point cards`;
+}
+
 export const roundMinimum = (r: RuleSet, roundIndex: number): number =>
   r.roundMinimums[roundIndex] ?? r.roundMinimums[r.roundMinimums.length - 1] ?? 0;
 

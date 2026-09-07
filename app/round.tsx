@@ -1,6 +1,6 @@
 import React, { useState, useMemo, useCallback, useRef, useEffect } from 'react';
 import { View, StyleSheet, TouchableOpacity, SafeAreaView, ScrollView, Alert } from 'react-native';
-import { Text } from '../components/AppText';
+import { Text, BODY_FONT_SCALE } from '../components/AppText';
 import { useRouter } from 'expo-router';
 import { useKeepAwake } from 'expo-keep-awake';
 import { useGames } from '../hooks/useGames';
@@ -12,6 +12,7 @@ import {
 import Scoreboard from '../components/Scoreboard';
 import CountTile from '../components/CountTile';
 import FlipTile from '../components/FlipTile';
+import TeamScorePanel from '../components/TeamScorePanel';
 import { C } from '../theme';
 
 const freshRound = (game: Game): Round => ({
@@ -23,23 +24,21 @@ export default function RoundScreen() {
   // between taps. It must not lock itself mid-count.
   useKeepAwake();
   const router = useRouter();
-  const { current, loading, saveCurrent, finishGame } = useGames();
+  const { current, prefs, loading, saveCurrent, finishGame, savePrefs } = useGames();
 
   const [teamIdx, setTeamIdx] = useState(0);
+  const [openTeamId, setOpenTeamId] = useState<string | null>(null);
   const [showDeal, setShowDeal] = useState(true);
   const scroller = useRef<ScrollView>(null);
-  // Advancing a round or a team must start at the top of the pad. Otherwise
-  // the scroll position carries over and the next screen opens halfway down,
-  // with the deal prompt off-screen above.
   const toTop = useCallback(() => scroller.current?.scrollTo({ y: 0, animated: false }), []);
 
   const game = current;
   const draft = useMemo(() => game?.draft ?? (game ? freshRound(game) : null), [game]);
 
-  // The counters are the most-tapped control in the app, and two taps inside
-  // one render frame would both read the same `game` from their closure — the
-  // second overwriting the first, silently losing a count. A ref updated
-  // synchronously on every edit is what makes fast tapping compose.
+  // Two taps inside one render frame would both read the same `game` from
+  // their closure, the second overwriting the first and silently losing a
+  // count. A ref updated synchronously on every edit is what makes fast
+  // input compose.
   const latest = useRef<Game | null>(null);
   useEffect(() => { latest.current = game; }, [game]);
 
@@ -53,6 +52,16 @@ export default function RoundScreen() {
 
   const editTeam = useCallback((teamId: string, fn: (tr: TeamRound) => TeamRound) => {
     applyDraft(d => ({ ...d, teams: d.teams.map(tr => (tr.teamId === teamId ? fn(tr) : tr)) }));
+  }, [applyDraft]);
+
+  const replaceTeam = useCallback((next: TeamRound) => {
+    // One team going out means the other did not, whichever way it was entered.
+    applyDraft(d => ({
+      ...d,
+      teams: d.teams.map(tr =>
+        tr.teamId === next.teamId ? next : (next.wentOut ? { ...tr, wentOut: false } : tr),
+      ),
+    }));
   }, [applyDraft]);
 
   if (loading) return <SafeAreaView style={styles.container} />;
@@ -71,12 +80,12 @@ export default function RoundScreen() {
 
   const roundIndex = game.rounds.length;
   const rules = game.rules;
+  const minimum = roundMinimum(rules, roundIndex);
+  const endOfRound = prefs.scoringMode === 'endOfRound';
   const team = game.teams[teamIdx];
   const tr = draft.teams.find(t => t.teamId === team.id) ?? emptyTeamRound(team.id);
   const bd = breakdown(tr, rules);
 
-  // Committed totals plus what's on the pad right now, so the scoreboard is
-  // never a round behind what people are looking at.
   const committed = totals(game);
   const live = game.teams.map(t => {
     const d = draft.teams.find(x => x.teamId === t.id);
@@ -96,8 +105,6 @@ export default function RoundScreen() {
       [which]: { ...t[which], [d]: Math.max(0, (t[which][d] ?? 0) + by) },
     }));
 
-  // Only one team goes out in a round, so marking one clears the other
-  // rather than letting both claim the bonus.
   const toggleGoOut = () => {
     applyDraft(d => ({
       ...d,
@@ -120,31 +127,34 @@ export default function RoundScreen() {
 
   const dealtPlayers = draft.teams.flatMap(t => t.perfectDealBy);
 
+  const swapMode = () => {
+    savePrefs({ ...prefs, scoringMode: endOfRound ? 'asYouGo' : 'endOfRound' });
+    setOpenTeamId(null);
+    setTeamIdx(0);
+  };
+
   const saveRound = () => {
     const base = latest.current ?? game;
-    const committed = base.draft ?? draft;
-    const next: Game = { ...base, rounds: [...base.rounds, committed], draft: undefined };
+    const committedRound = base.draft ?? draft;
+    const next: Game = { ...base, rounds: [...base.rounds, committedRound], draft: undefined };
     latest.current = next;
     const last = next.rounds.length >= roundCount(rules);
     if (last) {
-      Alert.alert(
-        'Last Round',
-        'That was the final round. Score the game?',
-        [
-          { text: 'Keep Editing', style: 'cancel' },
-          {
-            text: 'Finish',
-            onPress: async () => {
-              const done = await finishGame(next);
-              router.replace({ pathname: '/summary', params: { gameId: done.id } });
-            },
+      Alert.alert('Last Round', 'That was the final round. Score the game?', [
+        { text: 'Keep Editing', style: 'cancel' },
+        {
+          text: 'Finish',
+          onPress: async () => {
+            const done = await finishGame(next);
+            router.replace({ pathname: '/summary', params: { gameId: done.id } });
           },
-        ],
-      );
+        },
+      ]);
       return;
     }
     saveCurrent(next);
     setTeamIdx(0);
+    setOpenTeamId(null);
     setShowDeal(true);
     toTop();
   };
@@ -152,16 +162,12 @@ export default function RoundScreen() {
   const abandon = () => {
     Alert.alert('Quit Game?', 'This game and every round in it will be lost.', [
       { text: 'Cancel', style: 'cancel' },
-      {
-        text: 'Quit',
-        style: 'destructive',
-        onPress: () => { saveCurrent(null); router.replace('/'); },
-      },
+      { text: 'Quit', style: 'destructive', onPress: () => { saveCurrent(null); router.replace('/'); } },
     ]);
   };
 
-  const meldedPts = tallyPoints(tr.melded);
-  const madeMinimum = meldedPts >= roundMinimum(rules, roundIndex);
+  const melded = tallyPoints(tr.melded);
+  const madeMinimum = melded >= minimum;
 
   return (
     <SafeAreaView style={styles.container}>
@@ -169,18 +175,23 @@ export default function RoundScreen() {
         teams={live}
         roundIndex={roundIndex}
         roundCount={roundCount(rules)}
-        minimum={roundMinimum(rules, roundIndex)}
-        activeTeamId={team.id}
+        minimum={minimum}
+        activeTeamId={endOfRound ? (openTeamId ?? undefined) : team.id}
       />
 
-      <ScrollView ref={scroller} style={{ flex: 1 }} contentContainerStyle={styles.body}>
-        {/* The one score event known before a card is played. Asked at the
-            deal, because nobody remembers twenty minutes later who grabbed
-            thirteen twice. */}
+      <ScrollView
+        ref={scroller}
+        style={{ flex: 1 }}
+        contentContainerStyle={styles.body}
+        // iOS number pads have no return key, so this is the only way to
+        // dismiss the keyboard on a screen made of numeric fields.
+        keyboardDismissMode="on-drag"
+        keyboardShouldPersistTaps="handled"
+      >
         {showDeal && rules.perfectDeal !== 0 && (
           <View style={styles.dealCard}>
             <Text style={styles.dealTitle}>PERFECT DEAL?</Text>
-            <Text style={styles.dealSub}>
+            <Text style={styles.dealSub} maxFontSizeMultiplier={BODY_FONT_SCALE}>
               Anyone draw two piles of exactly 13? +{rules.perfectDeal} each.
             </Text>
             <View style={styles.chips}>
@@ -192,7 +203,12 @@ export default function RoundScreen() {
                     style={[styles.chip, on && styles.chipOn]}
                     onPress={() => togglePerfectDeal(p.id)}
                   >
-                    <Text style={[styles.chipText, on && styles.chipTextOn]}>{p.name}</Text>
+                    <Text
+                      style={[styles.chipText, on && styles.chipTextOn]}
+                      maxFontSizeMultiplier={BODY_FONT_SCALE}
+                    >
+                      {p.name}
+                    </Text>
                   </TouchableOpacity>
                 );
               })}
@@ -205,143 +221,158 @@ export default function RoundScreen() {
           </View>
         )}
 
-        <View style={styles.teamHead}>
-          <Text style={styles.teamHeadName}>{teamLabel(game, team).toUpperCase()}</Text>
-          <Text style={styles.teamHeadStep}>TEAM {teamIdx + 1} OF {game.teams.length}</Text>
-        </View>
-
-        {/* ---- melded ---- */}
-        <Text style={styles.section}>ON THE TABLE</Text>
-        <View style={styles.pad}>
-          {DENOMINATIONS.map(d => (
-            <CountTile
-              key={`m${d}`}
-              label={`×${d}`}
-              count={tr.melded[d]}
-              onAdd={() => bumpTally('melded', d, 1)}
-              onSubtract={() => bumpTally('melded', d, -1)}
-            />
-          ))}
-        </View>
-        <View style={styles.subtotalRow}>
-          <Text style={styles.subtotalLabel}>MELDED</Text>
-          <Text style={styles.subtotalValue}>{meldedPts}</Text>
-          <Text style={[styles.minFlag, madeMinimum ? styles.minFlagOk : styles.minFlagShort]}>
-            {madeMinimum ? '✓ PAST MINIMUM' : `${roundMinimum(rules, roundIndex) - meldedPts} SHORT`}
-          </Text>
-        </View>
-
-        {/* ---- books, go out, red threes ---- */}
-        <Text style={styles.section}>BOOKS & BONUSES</Text>
-        <View style={styles.row}>
-          <FlipTile
-            style={{ flex: 1 }}
-            label="BOOKS"
-            summary={
-              tr.cleanBooks + tr.dirtyBooks === 0
-                ? '—'
-                : `${tr.cleanBooks} clean · ${tr.dirtyBooks} dirty`
-            }
-            options={[
-              { key: 'clean', label: 'CLEAN', sub: `+${rules.cleanBook}` },
-              { key: 'dirty', label: 'DIRTY', sub: `+${rules.dirtyBook}` },
-            ]}
-            onPick={k => bump(k === 'clean' ? 'cleanBooks' : 'dirtyBooks', 1)}
-          />
-          <View style={styles.rowCol}>
-            {rules.goOutEnabled && (
-              <TouchableOpacity
-                style={[styles.wideBtn, tr.wentOut && styles.wideBtnOn]}
-                onPress={toggleGoOut}
-              >
-                <Text style={[styles.wideBtnText, tr.wentOut && styles.wideBtnTextOn]}>
-                  {tr.wentOut ? `WENT OUT +${rules.goOut}` : 'WENT OUT?'}
+        {endOfRound ? (
+          /* ---- count everything once, at the end ---- */
+          <>
+            {game.teams.map(t => {
+              const row = draft.teams.find(x => x.teamId === t.id) ?? emptyTeamRound(t.id);
+              return (
+                <TeamScorePanel
+                  key={t.id}
+                  title={teamLabel(game, t)}
+                  rules={rules}
+                  round={row}
+                  minimum={minimum}
+                  open={openTeamId === t.id}
+                  onOpen={() => setOpenTeamId(t.id)}
+                  onClose={() => setOpenTeamId(null)}
+                  onChange={replaceTeam}
+                />
+              );
+            })}
+            {dealtPlayers.length > 0 && (
+              <TouchableOpacity style={styles.dealEcho} onPress={() => setShowDeal(true)}>
+                <Text style={styles.dealEchoText} maxFontSizeMultiplier={BODY_FONT_SCALE}>
+                  Perfect deal: {dealtPlayers.map(id => playerName(game, id)).join(', ')} — tap to change
                 </Text>
               </TouchableOpacity>
             )}
-            <TouchableOpacity
-              style={styles.undoBooks}
-              onPress={() => {
-                if (tr.dirtyBooks > 0) bump('dirtyBooks', -1);
-                else if (tr.cleanBooks > 0) bump('cleanBooks', -1);
-              }}
-            >
-              <Text style={styles.undoBooksText}>REMOVE A BOOK</Text>
-            </TouchableOpacity>
-          </View>
-        </View>
+          </>
+        ) : (
+          /* ---- score a book at a time, as you play ---- */
+          <>
+            <View style={styles.teamHead}>
+              <Text style={styles.teamHeadName} maxFontSizeMultiplier={BODY_FONT_SCALE}>
+                {teamLabel(game, team).toUpperCase()}
+              </Text>
+              <Text style={styles.teamHeadStep}>TEAM {teamIdx + 1} OF {game.teams.length}</Text>
+            </View>
 
-        {tr.perfectDealBy.length > 0 && (
-          <TouchableOpacity style={styles.dealEcho} onPress={() => setShowDeal(true)}>
-            <Text style={styles.dealEchoText}>
-              Perfect deal: {tr.perfectDealBy.map(id => playerName(game, id)).join(', ')}
-              {' '}(+{tr.perfectDealBy.length * rules.perfectDeal}) — tap to change
-            </Text>
-          </TouchableOpacity>
+            <Text style={styles.section}>ON THE TABLE</Text>
+            <View style={styles.pad}>
+              {DENOMINATIONS.map(d => (
+                <CountTile
+                  key={`m${d}`}
+                  label={`×${d}`}
+                  count={tr.melded[d]}
+                  onAdd={() => bumpTally('melded', d, 1)}
+                  onSubtract={() => bumpTally('melded', d, -1)}
+                />
+              ))}
+            </View>
+            <View style={styles.subtotalRow}>
+              <Text style={styles.subtotalLabel}>MELDED</Text>
+              <Text style={styles.subtotalValue}>{melded}</Text>
+              <Text style={[styles.minFlag, madeMinimum ? styles.minFlagOk : styles.minFlagShort]}>
+                {madeMinimum ? '✓ PAST MINIMUM' : `${minimum - melded} SHORT`}
+              </Text>
+            </View>
+
+            <Text style={styles.section}>BOOKS & BONUSES</Text>
+            <View style={styles.row}>
+              <FlipTile
+                style={{ flex: 1 }}
+                label="BOOKS"
+                summary={
+                  tr.cleanBooks + tr.dirtyBooks === 0
+                    ? '—'
+                    : `${tr.cleanBooks} clean · ${tr.dirtyBooks} dirty`
+                }
+                options={[
+                  { key: 'clean', label: 'CLEAN', sub: `+${rules.cleanBook}` },
+                  { key: 'dirty', label: 'DIRTY', sub: `+${rules.dirtyBook}` },
+                ]}
+                onPick={k => bump(k === 'clean' ? 'cleanBooks' : 'dirtyBooks', 1)}
+              />
+              <View style={styles.rowCol}>
+                {rules.goOutEnabled && (
+                  <TouchableOpacity
+                    style={[styles.wideBtn, tr.wentOut && styles.wideBtnOn]}
+                    onPress={toggleGoOut}
+                  >
+                    <Text style={[styles.wideBtnText, tr.wentOut && styles.wideBtnTextOn]}>
+                      {tr.wentOut ? `WENT OUT +${rules.goOut}` : 'WENT OUT?'}
+                    </Text>
+                  </TouchableOpacity>
+                )}
+                <TouchableOpacity
+                  style={styles.undoBooks}
+                  onPress={() => {
+                    if (tr.dirtyBooks > 0) bump('dirtyBooks', -1);
+                    else if (tr.cleanBooks > 0) bump('cleanBooks', -1);
+                  }}
+                >
+                  <Text style={styles.undoBooksText}>REMOVE A BOOK</Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+
+            {tr.perfectDealBy.length > 0 && (
+              <TouchableOpacity style={styles.dealEcho} onPress={() => setShowDeal(true)}>
+                <Text style={styles.dealEchoText}>
+                  Perfect deal: {tr.perfectDealBy.map(id => playerName(game, id)).join(', ')}
+                  {' '}(+{tr.perfectDealBy.length * rules.perfectDeal}) — tap to change
+                </Text>
+              </TouchableOpacity>
+            )}
+
+            <Text style={[styles.section, styles.sectionDanger]}>WHAT IT COST YOU</Text>
+            <View style={styles.row}>
+              <CountTile
+                label="RED 3s"
+                count={tr.redThrees}
+                onAdd={() => bump('redThrees', 1)}
+                onSubtract={() => bump('redThrees', -1)}
+                tone="penalty"
+              />
+              <View style={styles.redNote}>
+                <Text style={styles.redNoteText}>{rules.redThree} each</Text>
+                <Text style={styles.redNoteSub}>
+                  {tr.redThrees > 0 ? `${tr.redThrees * rules.redThree} so far` : 'hold to remove'}
+                </Text>
+              </View>
+            </View>
+
+            <Text style={styles.subsection}>LEFT IN HAND & FOOT</Text>
+            <View style={styles.pad}>
+              {DENOMINATIONS.map(d => (
+                <CountTile
+                  key={`h${d}`}
+                  label={`×${d}`}
+                  count={tr.inHand[d]}
+                  onAdd={() => bumpTally('inHand', d, 1)}
+                  onSubtract={() => bumpTally('inHand', d, -1)}
+                  tone="penalty"
+                />
+              ))}
+            </View>
+
+            <View style={styles.totalCard}>
+              <View style={styles.totalRow}>
+                <Text style={styles.totalKeyBig}>ROUND</Text>
+                <Text style={styles.totalValBig}>{bd.total}</Text>
+              </View>
+            </View>
+          </>
         )}
 
-        {/* ---- what it costs ---- */}
-        <Text style={[styles.section, styles.sectionDanger]}>WHAT IT COST YOU</Text>
-        {/* Red threes sit here rather than beside the ×5 tile on purpose: at
-            -500 apiece a stray tap is the most expensive mistake the app can
-            make, more than a clean book is worth. */}
-        <View style={styles.row}>
-          <CountTile
-            label="RED 3s"
-            count={tr.redThrees}
-            onAdd={() => bump('redThrees', 1)}
-            onSubtract={() => bump('redThrees', -1)}
-            tone="penalty"
-          />
-          <View style={styles.redNote}>
-            <Text style={styles.redNoteText}>
-              {rules.redThree} each
-            </Text>
-            <Text style={styles.redNoteSub}>
-              {tr.redThrees > 0 ? `${tr.redThrees * rules.redThree} so far` : 'hold to remove'}
-            </Text>
-          </View>
-        </View>
-
-        <Text style={styles.subsection}>LEFT IN HAND & FOOT</Text>
-        <View style={styles.pad}>
-          {DENOMINATIONS.map(d => (
-            <CountTile
-              key={`h${d}`}
-              label={`×${d}`}
-              count={tr.inHand[d]}
-              onAdd={() => bumpTally('inHand', d, 1)}
-              onSubtract={() => bumpTally('inHand', d, -1)}
-              tone="penalty"
-            />
-          ))}
-        </View>
-
-        {/* ---- running total ---- */}
-        <View style={styles.totalCard}>
-          <View style={styles.totalRow}>
-            <Text style={styles.totalKey}>Melded</Text><Text style={styles.totalVal}>{bd.melded}</Text>
-          </View>
-          <View style={styles.totalRow}>
-            <Text style={styles.totalKey}>Books</Text><Text style={styles.totalVal}>{bd.books}</Text>
-          </View>
-          <View style={styles.totalRow}>
-            <Text style={styles.totalKey}>Bonuses</Text><Text style={styles.totalVal}>{bd.bonuses}</Text>
-          </View>
-          <View style={styles.totalRow}>
-            <Text style={styles.totalKey}>Red threes</Text>
-            <Text style={[styles.totalVal, bd.redThrees !== 0 && styles.totalValBad]}>{bd.redThrees}</Text>
-          </View>
-          <View style={styles.totalRow}>
-            <Text style={styles.totalKey}>In hand</Text>
-            <Text style={[styles.totalVal, bd.inHand !== 0 && styles.totalValBad]}>−{bd.inHand}</Text>
-          </View>
-          <View style={styles.totalDivider} />
-          <View style={styles.totalRow}>
-            <Text style={styles.totalKeyBig}>ROUND</Text>
-            <Text style={styles.totalValBig}>{bd.total}</Text>
-          </View>
-        </View>
+        <TouchableOpacity style={styles.modeSwap} onPress={swapMode}>
+          <Text style={styles.modeSwapText} maxFontSizeMultiplier={BODY_FONT_SCALE}>
+            {endOfRound
+              ? 'Counting as you play instead? Switch to tap-to-count →'
+              : 'Counting the piles at the end instead? Switch to type-it-in →'}
+          </Text>
+        </TouchableOpacity>
 
         <TouchableOpacity onPress={abandon} style={styles.quit}>
           <Text style={styles.quitText}>QUIT GAME</Text>
@@ -349,15 +380,25 @@ export default function RoundScreen() {
       </ScrollView>
 
       <View style={styles.bottomBar}>
-        {teamIdx > 0 ? (
-          <TouchableOpacity style={styles.secondaryBtn} onPress={() => { setTeamIdx(teamIdx - 1); toTop(); }}>
-            <Text style={styles.secondaryBtnText}>← {teamLabel(game, game.teams[teamIdx - 1]).toUpperCase()}</Text>
+        {!endOfRound && teamIdx > 0 && (
+          <TouchableOpacity
+            style={styles.secondaryBtn}
+            onPress={() => { setTeamIdx(teamIdx - 1); toTop(); }}
+          >
+            <Text style={styles.secondaryBtnText} numberOfLines={1}>
+              ← {teamLabel(game, game.teams[teamIdx - 1]).toUpperCase()}
+            </Text>
           </TouchableOpacity>
-        ) : <View style={{ flex: 1 }} />}
+        )}
 
-        {teamIdx < game.teams.length - 1 ? (
-          <TouchableOpacity style={styles.primaryBtn} onPress={() => { setTeamIdx(teamIdx + 1); toTop(); }}>
-            <Text style={styles.primaryBtnText}>{teamLabel(game, game.teams[teamIdx + 1]).toUpperCase()} →</Text>
+        {!endOfRound && teamIdx < game.teams.length - 1 ? (
+          <TouchableOpacity
+            style={styles.primaryBtn}
+            onPress={() => { setTeamIdx(teamIdx + 1); toTop(); }}
+          >
+            <Text style={styles.primaryBtnText} numberOfLines={1}>
+              {teamLabel(game, game.teams[teamIdx + 1]).toUpperCase()} →
+            </Text>
           </TouchableOpacity>
         ) : (
           <TouchableOpacity style={styles.primaryBtn} onPress={saveRound}>
@@ -371,23 +412,23 @@ export default function RoundScreen() {
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: C.bg },
-  body: { padding: 12, paddingBottom: 28, gap: 8 },
+  body: { padding: 12, paddingBottom: 28, gap: 10 },
   empty: { flex: 1, alignItems: 'center', justifyContent: 'center', gap: 16, padding: 24 },
   emptyText: { color: C.textDim, fontSize: 16 },
 
   dealCard: {
     backgroundColor: C.surface, borderRadius: 14, borderWidth: 1,
-    borderColor: C.brassDim, padding: 12, gap: 8,
+    borderColor: C.brassDim, padding: 14, gap: 8,
   },
   dealTitle: { color: C.brass, fontSize: 14, fontWeight: '800', letterSpacing: 1.4 },
-  dealSub: { color: C.textDim, fontSize: 13 },
+  dealSub: { color: C.textDim, fontSize: 14, lineHeight: 20 },
   chips: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
   chip: {
-    paddingVertical: 8, paddingHorizontal: 14, borderRadius: 999,
+    paddingVertical: 10, paddingHorizontal: 16, borderRadius: 999,
     borderWidth: 1, borderColor: C.border, backgroundColor: C.surfaceRaised,
   },
   chipOn: { borderColor: C.brass, backgroundColor: C.brassFaint },
-  chipText: { color: C.textDim, fontSize: 14, fontWeight: '700' },
+  chipText: { color: C.textDim, fontSize: 15, fontWeight: '700' },
   chipTextOn: { color: C.brass },
   dealDone: { color: C.textMuted, fontSize: 12, fontWeight: '800', letterSpacing: 1.2, paddingTop: 2 },
 
@@ -395,12 +436,9 @@ const styles = StyleSheet.create({
   teamHeadName: { color: C.text, fontSize: 20, fontWeight: '800' },
   teamHeadStep: { color: C.textMuted, fontSize: 11, fontWeight: '800', letterSpacing: 1.2, marginTop: 1 },
 
-  section: {
-    color: C.brassMuted, fontSize: 11, fontWeight: '800',
-    letterSpacing: 1.4, marginTop: 10,
-  },
+  section: { color: C.brassMuted, fontSize: 11, fontWeight: '800', letterSpacing: 1.4, marginTop: 6 },
   sectionDanger: { color: C.danger },
-  subsection: { color: C.danger, fontSize: 11, fontWeight: '800', letterSpacing: 1.2, marginTop: 4 },
+  subsection: { color: C.danger, fontSize: 11, fontWeight: '800', letterSpacing: 1.2, marginTop: 2 },
   pad: { flexDirection: 'row', gap: 8 },
   row: { flexDirection: 'row', gap: 8 },
   rowCol: { flex: 1, gap: 8 },
@@ -426,7 +464,7 @@ const styles = StyleSheet.create({
   undoBooksText: { color: C.textFaint, fontSize: 11, fontWeight: '800', letterSpacing: 1 },
 
   dealEcho: { paddingVertical: 4 },
-  dealEchoText: { color: C.brassMuted, fontSize: 12 },
+  dealEchoText: { color: C.brassMuted, fontSize: 13 },
 
   redNote: { flex: 1, justifyContent: 'center', paddingLeft: 4 },
   redNoteText: { color: C.danger, fontSize: 18, fontWeight: '800' },
@@ -434,17 +472,16 @@ const styles = StyleSheet.create({
 
   totalCard: {
     backgroundColor: C.surface, borderRadius: 14, borderWidth: 1,
-    borderColor: C.border, padding: 12, marginTop: 10, gap: 4,
+    borderColor: C.border, padding: 14, marginTop: 6,
   },
-  totalRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'baseline' },
-  totalKey: { color: C.textMuted, fontSize: 13 },
-  totalVal: { color: C.textDim, fontSize: 15, fontWeight: '700' },
-  totalValBad: { color: C.dangerBright },
-  totalDivider: { height: 1, backgroundColor: C.border, marginVertical: 6 },
+  totalRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
   totalKeyBig: { color: C.text, fontSize: 15, fontWeight: '800', letterSpacing: 1 },
   totalValBig: { color: C.brass, fontSize: 30, fontWeight: '800' },
 
-  quit: { alignItems: 'center', paddingTop: 18 },
+  modeSwap: { paddingTop: 18, alignItems: 'center' },
+  modeSwapText: { color: C.brassMuted, fontSize: 13, textAlign: 'center' },
+
+  quit: { alignItems: 'center', paddingTop: 20 },
   quitText: { color: C.dangerBorder, fontSize: 11, fontWeight: '800', letterSpacing: 1.4 },
 
   bottomBar: {
