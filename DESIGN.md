@@ -211,6 +211,34 @@ panel whose height follows its own content, which matters because the back is
 roughly six times taller than the front and both have to grow again when
 someone turns their phone's text size up.
 
+**A flip must not leave a 3D transform behind.** Found Sept 2026, on a real
+phone, and it is the kind of bug that reads as "the design is just a bit
+cheap" rather than as a defect.
+
+The obvious way to turn a view over is to rotate it a full 180° and
+counter-rotate its content so the text is not mirrored. That is what the first
+version did, and it means the panel sits in a *composed* 3D transform for as
+long as it is open. iOS responds by keeping the view in an offscreen
+rasterized layer and resampling it, so every glyph is drawn once into a bitmap
+and then scaled. The text is visibly soft the entire time the panel is open —
+not just while it animates. Two people noticed it before anyone could say why.
+
+The same offscreen compositing pass, with `overflow: hidden` in the mix, is
+also what made a *sibling* view — the panel above — flash half black for a
+second or two on device.
+
+`hooks/useHalfFlip.ts` goes half way and back instead: 0° → 90° turns the view
+edge-on, the face swaps while nobody can see it, then −90° → 0° brings it back.
+Two things fall out, both good — at rest the transform is removed entirely, so
+text renders at native resolution and no offscreen layer lingers; and the
+rotation never passes 90°, so content is never mirrored and needs no
+counter-rotation at all. `backfaceVisibility` and the stacked
+absolutely-positioned faces are both gone.
+
+The lesson generalises past this app: **animate with a transform, then take the
+transform away.** Anything left in a 3D transform at rest pays for it in text
+quality.
+
 **Row labels come from the rules, not from the code.** The panel names each
 denomination with the ranks that earn it — "Joker", "Deuce, Ace", "10 – King",
 "4 – 9, Black three" — derived from `cardValues` by grouping on value. A house

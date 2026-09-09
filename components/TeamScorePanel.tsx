@@ -1,11 +1,12 @@
-import React, { useRef, useEffect, useCallback, useState } from 'react';
-import { View, StyleSheet, TouchableOpacity, Animated, Easing } from 'react-native';
+import React, { useCallback, useState } from 'react';
+import { View, StyleSheet, TouchableOpacity, Animated } from 'react-native';
 import { Text, BODY_FONT_SCALE } from './AppText';
 import NumberField from './NumberField';
 import {
   RuleSet, TeamRound, Denomination, DENOMINATIONS,
   denominationLabel, breakdown, tallyPoints,
 } from '../hooks/scoring';
+import { useHalfFlip } from '../hooks/useHalfFlip';
 import { C } from '../theme';
 
 interface Props {
@@ -25,35 +26,21 @@ interface Props {
  * holding. It stays turned until DONE, because filling in six numbers behind a
  * panel that flips back after each one would be unusable.
  *
- * The flip swaps faces at the halfway point rather than stacking two
- * absolutely-positioned faces. That costs a line of timing code and buys a
- * panel whose height follows its own content — which matters here, because the
- * back is roughly six times taller than the front and both have to grow again
- * when someone turns their phone's text size up.
+ * The turn goes half way and back rather than a full 180° — see useHalfFlip
+ * for why that matters for text sharpness. Rendering one face at a time also
+ * lets the panel's height follow its own content, which matters here because
+ * the back is roughly six times taller than the front and both have to grow
+ * again when someone turns their phone's text size up.
  */
 export default function TeamScorePanel({
   title, rules, round, minimum, open, onOpen, onClose, onChange,
 }: Props) {
-  const spin = useRef(new Animated.Value(0)).current;
-  const [face, setFace] = useState<'front' | 'back'>('front');
-  const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const { face, flipStyle } = useHalfFlip(open);
   const [showInHand, setShowInHand] = useState(false);
 
   const bd = breakdown(round, rules);
   const melded = tallyPoints(round.melded);
   const inHand = tallyPoints(round.inHand);
-
-  useEffect(() => {
-    Animated.timing(spin, {
-      toValue: open ? 1 : 0,
-      duration: 260,
-      easing: Easing.inOut(Easing.cubic),
-      useNativeDriver: true,
-    }).start();
-    if (timer.current) clearTimeout(timer.current);
-    timer.current = setTimeout(() => setFace(open ? 'back' : 'front'), 130);
-    return () => { if (timer.current) clearTimeout(timer.current); };
-  }, [open, spin]);
 
   // Anything the panel already knows about, so a closed panel still reports.
   const closedSummary = () => {
@@ -74,18 +61,9 @@ export default function TeamScorePanel({
   const setTally = (which: 'melded' | 'inHand', d: Denomination, n: number) =>
     onChange({ ...round, [which]: { ...round[which], [d]: n } });
 
-  const rotate = spin.interpolate({ inputRange: [0, 1], outputRange: ['0deg', '180deg'] });
-
   return (
-    <Animated.View
-      style={[
-        styles.panel,
-        open && styles.panelOpen,
-        { transform: [{ perspective: 1000 }, { rotateY: rotate }] },
-      ]}
-    >
-      {/* Un-mirror the content while the panel itself is turned over. */}
-      <View style={face === 'back' ? styles.unmirror : undefined}>
+    <Animated.View style={[styles.panel, open && styles.panelOpen, flipStyle]}>
+      <View>
         {face === 'front' ? (
           <TouchableOpacity style={styles.front} onPress={onOpen} activeOpacity={0.75}>
             <View style={styles.frontHead}>
@@ -213,10 +191,9 @@ export default function TeamScorePanel({
 const styles = StyleSheet.create({
   panel: {
     backgroundColor: C.surface, borderRadius: 16,
-    borderWidth: 1, borderColor: C.border, overflow: 'hidden',
+    borderWidth: 1, borderColor: C.border,
   },
   panelOpen: { borderColor: C.brass, backgroundColor: C.surfaceRaised },
-  unmirror: { transform: [{ rotateY: '180deg' }] },
 
   front: { padding: 16, gap: 4 },
   frontHead: { flexDirection: 'row', alignItems: 'center', gap: 12 },
