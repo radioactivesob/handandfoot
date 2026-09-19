@@ -40,8 +40,10 @@ launch flows into the app without a seam.
 `dd8d0420-0176-4c30-abb4-0a701ae94319`. `npx expo-doctor` passes 21/21 and
 `npx expo export --platform ios` produces a clean 2.5 MB Hermes bundle.
 
-**On a phone via TestFlight** since Sept 2026 — build 3 (`f82c0e5`), with
-credentials on the EAS server and an App Store Connect record. Two real games
+**On a phone via TestFlight** since Sept 2026, with credentials on the EAS
+server and an App Store Connect record (ASC app id `6809561558`, now in
+`eas.json`, so `eas submit --latest --non-interactive` needs no Apple login).
+Build 4 (`89f708f`) is the current one. Two real games
 played on it so far. Not done: the JPEG share card — text and PDF only.
 
 **The software keyboard is field-tested, not simulator-tested.** The simulator
