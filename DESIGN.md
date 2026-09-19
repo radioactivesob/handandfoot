@@ -40,15 +40,21 @@ launch flows into the app without a seam.
 `dd8d0420-0176-4c30-abb4-0a701ae94319`. `npx expo-doctor` passes 21/21 and
 `npx expo export --platform ios` produces a clean 2.5 MB Hermes bundle.
 
-Not done: the JPEG share card — text and PDF only so far — and **no build has
-left this machine**. Nothing is signed, and no App Store Connect record exists.
+**On a phone via TestFlight** since Sept 2026 — build 3 (`f82c0e5`), with
+credentials on the EAS server and an App Store Connect record. Two real games
+played on it so far. Not done: the JPEG share card — text and PDF only.
 
-**Text entry has not been tested with the software keyboard.** The simulator
+**The software keyboard is field-tested, not simulator-tested.** The simulator
 connects the hardware keyboard by default, so no on-screen keyboard ever
-appeared during the walkthrough and the whole class of overlap bugs stayed
-invisible — the same trap Crosscourt shipped to a real phone. Setup (four
-fields) and the rules screen (numeric fields, and iOS numeric pads have no
-return key) both need a pass with it switched off.
+appeared during any walkthrough here and the whole class of overlap bugs
+stayed invisible — the same trap Crosscourt shipped to a real phone. It was
+verified the only way it could be: at the table. Second real game, Sept 2026 —
+a pile of 35 cards at ×5 went in through the number pad, the small counts
+through the steppers, and a full round was scored that way. So the numeric
+fields, `keyboardDismissMode="on-drag"` for a pad with no return key, and the
+typed-plus-steppers pairing all hold up in use. Setup's four name fields have
+not had the same scrutiny but are ordinary text inputs on a screen with no
+overlap risk.
 
 ## The house rules
 
