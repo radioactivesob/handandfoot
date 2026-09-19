@@ -465,6 +465,15 @@ Not done, and worth knowing about:
 - **VoiceOver** has labels on the fields and tiles but has not been walked
   end to end.
 
+**iPhone only, on purpose.** `supportsTablet` is off (Sept 2026). The app runs
+on iPad, but as a phone layout stretched across a thousand points — three
+cards and three-quarters of a blank screen — and with the flag on, Apple
+requires iPad screenshots of exactly that. With it off, iPads still install
+the app and run it in iPhone-compatibility mode, a phone-shaped window,
+which for this layout is the better experience. A real iPad layout (a
+centred column, or two panels side by side) is a proper follow-up; flipping
+the flag back on is trivial once one exists. Native config: takes a build.
+
 ## Open items
 
 - **Name.** "Hand and Foot" is descriptive and unfindable; the sibling apps are
