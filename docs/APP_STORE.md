@@ -135,11 +135,17 @@ iPhone 6.9" only (1320 × 2868), since `supportsTablet` is off. Up to ten;
 the first three carry the listing. Captured from the iPhone 17 Pro Max
 simulator with a staged game — see `docs/screenshots/`.
 
-Order:
+Captured from the Release build on the iPhone 17 Pro Max simulator, with a
+staged game: Ruth & Frank vs Carol & Dave. Files are in listing order.
 
-1. Round screen — the scoreboard, both team panels, the pill.   *hero*
-2. A team panel open — books, the typed card counts, the penalty section.
-3. "Can I meld?" showing green.
-4. House rules.
-5. The summary after four rounds.
-6. Home.
+1. `01-round.png` — the scoreboard, both team panels, the NEED pill.  *hero*
+2. `02-summary.png` — "Ruth & Frank win it", the round grid, the superlatives.
+   The smack-talk screen; the strongest frame, so it goes in the top three.
+3. `03-panel.png` — a team panel open: books, typed card counts with live
+   point readouts, 18 fives → +90.
+4. `04-meld-check.png` — "Can I meld?" reading 155, green, checkmark.
+5. `05-rules.png` — House Rules: counting mode, round minimums, book values.
+6. `06-home.png` — Home.
+
+Upload in that order. No captions or device frames — plain screenshots are
+accepted, and the app's own chrome carries the story.
