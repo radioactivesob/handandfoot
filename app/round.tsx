@@ -205,6 +205,10 @@ export default function RoundScreen() {
         roundCount={roundCount(rules)}
         minimum={minimum}
         activeTeamId={endOfRound ? (openTeamId ?? undefined) : team.id}
+        onSelectTeam={endOfRound ? undefined : id => {
+          const idx = game.teams.findIndex(t => t.id === id);
+          if (idx >= 0) setTeamIdx(idx);
+        }}
         onBack={roundIndex > 0 ? () => goToRound(roundIndex - 1) : undefined}
         onForward={revisiting ? () => goToRound(roundIndex + 1) : undefined}
       />
@@ -292,7 +296,7 @@ export default function RoundScreen() {
               <Text style={styles.teamHeadName} maxFontSizeMultiplier={BODY_FONT_SCALE}>
                 {teamLabel(game, team).toUpperCase()}
               </Text>
-              <Text style={styles.teamHeadStep}>TEAM {teamIdx + 1} OF {game.teams.length}</Text>
+              <Text style={styles.teamHeadStep}>SCORING · TAP A TEAM UP TOP TO SWITCH</Text>
             </View>
 
             <Text style={styles.section}>ON THE TABLE</Text>
@@ -417,27 +421,7 @@ export default function RoundScreen() {
       </ScrollView>
 
       <View style={styles.bottomBar}>
-        {!endOfRound && teamIdx > 0 && (
-          <TouchableOpacity
-            style={styles.secondaryBtn}
-            onPress={() => { setTeamIdx(teamIdx - 1); toTop(); }}
-          >
-            <Text style={styles.secondaryBtnText} numberOfLines={1}>
-              ← {teamLabel(game, game.teams[teamIdx - 1]).toUpperCase()}
-            </Text>
-          </TouchableOpacity>
-        )}
-
-        {!endOfRound && teamIdx < game.teams.length - 1 ? (
-          <TouchableOpacity
-            style={styles.primaryBtn}
-            onPress={() => { setTeamIdx(teamIdx + 1); toTop(); }}
-          >
-            <Text style={styles.primaryBtnText} numberOfLines={1}>
-              {teamLabel(game, game.teams[teamIdx + 1]).toUpperCase()} →
-            </Text>
-          </TouchableOpacity>
-        ) : revisiting ? (
+        {revisiting ? (
           <TouchableOpacity style={styles.primaryBtn} onPress={() => goToRound(liveIndex)}>
             <Text style={styles.primaryBtnText} numberOfLines={1}>
               ↩︎  BACK TO ROUND {liveIndex + 1}
@@ -536,9 +520,4 @@ const styles = StyleSheet.create({
     alignItems: 'center', justifyContent: 'center', paddingVertical: 15,
   },
   primaryBtnText: { color: C.onBrass, fontSize: 14, fontWeight: '800', letterSpacing: 1 },
-  secondaryBtn: {
-    flex: 1, borderRadius: 12, borderWidth: 1, borderColor: C.borderStrong,
-    alignItems: 'center', justifyContent: 'center', paddingVertical: 15,
-  },
-  secondaryBtnText: { color: C.textDim, fontSize: 13, fontWeight: '800', letterSpacing: 1 },
 });

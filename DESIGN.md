@@ -347,6 +347,17 @@ closed one, and a `ScrollView` keeps its offset when content shrinks under it
 the next touch. RETURN means "back to the teams" anyway, so `onClose` scrolls
 there.
 
+**Count-as-you-go picks teams on the scoreboard.** Both teams play at once
+and books go down in any order, so the pad has to switch between them freely.
+The first version stepped through teams with a NEXT button at the bottom,
+which read as a linear flow — score one team, then the other, then save — and
+contradicted the premise of the mode. The scoreboard already showed both team
+names side by side and already outlined the active one; it just wasn't
+tappable. Now it is the selector: tap a tile to score that team, both tiles
+carry a faint outline so they read as tappable, the brass one is the one
+you're on, and the bottom bar is only SAVE ROUND. Noticed from the UI alone
+before the mode had been used in anger — worth a real test.
+
 Two glyph notes from the same pass: `↩` has both text and emoji presentations
 and iOS picks the blue emoji tile; `↩\ufe0e` (the text-presentation selector)
 draws it as a glyph in the button's own colour. The same trap as the card
