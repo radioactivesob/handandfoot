@@ -1,16 +1,21 @@
 import React from 'react';
-import { View, StyleSheet } from 'react-native';
+import { View, StyleSheet, TouchableOpacity } from 'react-native';
 import { Text } from './AppText';
 import { C } from '../theme';
 
 interface Props {
   teams: { id: string; label: string; total: number }[];
-  /** 0-based index of the round being played. */
+  /** 0-based index of the round on screen. */
   roundIndex: number;
+  /** 0-based index of the round actually in progress. Equal to roundIndex
+   *  unless a past round has been reopened to fix a score. */
+  liveIndex: number;
   roundCount: number;
   minimum: number;
   /** Which team the pad is currently collecting, if any. */
   activeTeamId?: string;
+  onBack?: () => void;
+  onForward?: () => void;
 }
 
 /**
@@ -19,10 +24,16 @@ interface Props {
  * The third line is the one that earns its keep: the meld minimum for this
  * round is the question actually asked out loud every round ("what do we need
  * to get down?"), and answering it permanently in chrome costs nothing.
+ *
+ * The arrows either side of the round are how a past round gets reopened —
+ * the same control Crosscourt puts on its set indicator. Round 2 was open at
+ * the first real game when someone realised round 1 hadn't been fully
+ * counted, and there was no way back.
  */
 export default function Scoreboard({
-  teams, roundIndex, roundCount, minimum, activeTeamId,
+  teams, roundIndex, liveIndex, roundCount, minimum, activeTeamId, onBack, onForward,
 }: Props) {
+  const revisiting = roundIndex < liveIndex;
   return (
     <View style={styles.bar}>
       <View style={styles.teams}>
@@ -39,7 +50,19 @@ export default function Scoreboard({
         })}
       </View>
       <View style={styles.meta}>
-        <Text style={styles.round}>ROUND {roundIndex + 1} OF {roundCount}</Text>
+        {onBack ? (
+          <TouchableOpacity onPress={onBack} hitSlop={12} style={styles.arrow}>
+            <Text style={styles.arrowText}>←</Text>
+          </TouchableOpacity>
+        ) : <View style={styles.arrow} />}
+        <Text style={[styles.round, revisiting && styles.roundRevisiting]}>
+          ROUND {roundIndex + 1} OF {roundCount}{revisiting ? '  ·  FIXING' : ''}
+        </Text>
+        {onForward ? (
+          <TouchableOpacity onPress={onForward} hitSlop={12} style={styles.arrow}>
+            <Text style={styles.arrowText}>→</Text>
+          </TouchableOpacity>
+        ) : <View style={styles.arrow} />}
         <Text style={styles.dot}>·</Text>
         <Text style={styles.minimum}>NEED {minimum} TO MELD</Text>
       </View>
@@ -72,6 +95,9 @@ const styles = StyleSheet.create({
   teamTotalActive: { color: C.brass },
   meta: { flexDirection: 'row', justifyContent: 'center', alignItems: 'center', gap: 6, marginTop: 2 },
   round: { color: C.textMuted, fontSize: 11, fontWeight: '800', letterSpacing: 1.2 },
+  roundRevisiting: { color: C.brass },
+  arrow: { width: 26, alignItems: 'center', justifyContent: 'center', paddingVertical: 2 },
+  arrowText: { color: C.brass, fontSize: 15, fontWeight: '800' },
   dot: { color: C.textGhost, fontSize: 11 },
   minimum: { color: C.brassMuted, fontSize: 11, fontWeight: '800', letterSpacing: 1.2 },
 });

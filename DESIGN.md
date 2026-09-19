@@ -306,37 +306,51 @@ is the detail that makes the app feel like it was built by someone who plays.
 | Rules | Every value in the table above, editable |
 | Export | JPEG smack-talk card + PDF record |
 
-## Next build
+## What the first real game changed
 
-From the first real game, Sept 2026. All three are the table correcting the
-design, and two of them correct decisions written above.
+Sept 2026. All three are the table correcting the design, and two of them
+reverse decisions recorded above. Built and verified on the simulator; on the
+phone from the next build.
 
-**The penalty section must be permanently visible.** Cards left in hand and
-foot subtract at face value and the total goes negative — the model has always
-done this. But the panel hid the section behind a small `+ Cards left in hand`
+**The penalty section is permanently visible.** Cards left in hand and foot
+subtract at face value and the total goes negative — the model always did
+this. But the panel hid the section behind a small `+ Cards left in hand`
 link, off by default, to keep the panel short. Nobody found a grey link with
 four people waiting, so a player caught with a full hand could not be scored
-and the table concluded the app "had no way to enter negatives." This is the
-compromise the locked decision above warned against: *the in-hand pad is
-styled in the danger palette and sits below a rule*. Do that. Always shown,
-red, labelled as the column that counts against you.
+and the table concluded the app "had no way to enter negatives." This was the
+compromise the locked decision above warned against. It is now always shown,
+in the danger palette, with a one-line explanation of what it is, and a
+negative round total reads red on both faces of the panel.
 
-**Rounds must be revisitable.** Round 2 was open when someone realised round 1
-had not been fully counted, and there was no way back. Crosscourt's set
-control is the pattern — `←` on the indicator. `← ROUND 1` in the scoreboard
-opens the saved round with both panels pre-filled; SAVE rewrites that round in
-place, later rounds are untouched, totals recompute, and the app returns to
-the round in progress. Saving a past round must never truncate the rounds
-after it.
+**Rounds are revisitable.** Round 2 was open when someone realised round 1 had
+not been fully counted, and there was no way back. `←` / `→` on the
+scoreboard's round indicator — Crosscourt's set control — move between rounds.
+A reopened round shows `FIXING` in brass, its own meld minimum, both panels
+pre-filled, and a `BACK TO ROUND N` button where SAVE would be. Edits go
+straight into `game.rounds[i]` and persist on every tap, exactly as the draft
+does, so there is no second save step to forget; later rounds are untouched and
+the totals recompute live. Verified: a clean book added to round 1 moved the
+scoreboard from −1000 to −500 on the spot.
 
-**One exit per phase, named for what it does.** The panel had two DONE buttons
-— a chip top-right and a button at the bottom — doing the identical thing. The
-table read them correctly as two *different* things and got confused that they
-weren't. The real flow at the table is: books first for both teams (they are
-the piles), then loose cards. So each panel is opened twice per round, and the
-first visit ends after BOOKS. Delete the top-right chip; put `↩ RETURN` directly
-after the BOOKS section; keep the big DONE at the end. Two exits, each at the
-end of its phase.
+**One exit per phase, named for what it does.** The panel had two DONE
+buttons, a chip top-right and a button at the bottom, doing the identical
+thing. The table read them — correctly — as two *different* things. The real
+flow is books first for both teams (they are the piles), then loose cards, so
+each panel is opened twice a round and the first visit ends after BOOKS. The
+chip is gone; `↩ RETURN` sits directly after BOOKS with "books are in — come
+back for the cards" under it; the big DONE stays at the end of the pass.
+
+**Closing a panel scrolls to the top.** Found while verifying the above, and
+almost certainly in build 3 as well. The open face is ~1100pt taller than the
+closed one, and a `ScrollView` keeps its offset when content shrinks under it
+— so closing from anywhere past the first screenful left the body blank until
+the next touch. RETURN means "back to the teams" anyway, so `onClose` scrolls
+there.
+
+Two glyph notes from the same pass: `↩` has both text and emoji presentations
+and iOS picks the blue emoji tile; `↩\ufe0e` (the text-presentation selector)
+draws it as a glyph in the button's own colour. The same trap as the card
+icons rule in the conventions, from the other direction.
 
 ## Open items
 

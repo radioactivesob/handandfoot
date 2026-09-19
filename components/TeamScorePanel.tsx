@@ -1,4 +1,4 @@
-import React, { useCallback, useState } from 'react';
+import React, { useCallback } from 'react';
 import { View, StyleSheet, TouchableOpacity, Animated } from 'react-native';
 import { Text, BODY_FONT_SCALE } from './AppText';
 import NumberField from './NumberField';
@@ -23,8 +23,21 @@ interface Props {
 /**
  * One panel per team. Tap it, it turns over, and everything that team scored
  * this round is on the back — books, what's on the table, what they got caught
- * holding. It stays turned until DONE, because filling in six numbers behind a
- * panel that flips back after each one would be unusable.
+ * holding. It stays turned until you leave it, because filling in six numbers
+ * behind a panel that flips back after each one would be unusable.
+ *
+ * It has two exits, and they are not interchangeable. At the table books get
+ * counted first for both teams, because they are the piles; the loose cards
+ * come after. So each panel is opened twice a round, and the first visit ends
+ * after BOOKS. RETURN sits right there. DONE sits at the end of the whole
+ * pass. The first version had two buttons both labelled DONE doing the same
+ * thing, and the table read them — correctly — as two different things.
+ *
+ * The penalty section is always shown. It was folded behind a small link to
+ * keep the panel short, and with four people waiting nobody found a grey link,
+ * so a player caught with a full hand could not be scored at all. The moment
+ * someone is holding a fistful of cards is exactly when the column that
+ * counts against them needs to be the most obvious thing on the screen.
  *
  * The turn goes half way and back rather than a full 180° — see useHalfFlip
  * for why that matters for text sharpness. Rendering one face at a time also
@@ -36,7 +49,6 @@ export default function TeamScorePanel({
   title, rules, round, minimum, open, onOpen, onClose, onChange,
 }: Props) {
   const { face, flipStyle } = useHalfFlip(open);
-  const [showInHand, setShowInHand] = useState(false);
 
   const bd = breakdown(round, rules);
   const melded = tallyPoints(round.melded);
@@ -70,7 +82,7 @@ export default function TeamScorePanel({
               <Text style={styles.frontTitle} numberOfLines={1} maxFontSizeMultiplier={BODY_FONT_SCALE}>
                 {title.toUpperCase()}
               </Text>
-              <Text style={styles.frontScore}>{bd.total}</Text>
+              <Text style={[styles.frontScore, bd.total < 0 && styles.negative]}>{bd.total}</Text>
             </View>
             <Text style={styles.frontSummary} maxFontSizeMultiplier={BODY_FONT_SCALE} numberOfLines={2}>
               {closedSummary()}
@@ -83,9 +95,6 @@ export default function TeamScorePanel({
               <Text style={styles.backTitle} numberOfLines={1} maxFontSizeMultiplier={BODY_FONT_SCALE}>
                 {title.toUpperCase()}
               </Text>
-              <TouchableOpacity onPress={onClose} hitSlop={10} style={styles.doneChip}>
-                <Text style={styles.doneChipText}>DONE</Text>
-              </TouchableOpacity>
             </View>
 
             <Text style={styles.section}>BOOKS</Text>
@@ -103,6 +112,14 @@ export default function TeamScorePanel({
               points={round.dirtyBooks * rules.dirtyBook}
               onChange={n => set({ dirtyBooks: n })}
             />
+            <TouchableOpacity style={styles.returnBtn} onPress={onClose}>
+              <Text style={styles.returnBtnText} maxFontSizeMultiplier={BODY_FONT_SCALE}>
+                ↩︎  RETURN
+              </Text>
+              <Text style={styles.returnBtnSub} maxFontSizeMultiplier={BODY_FONT_SCALE}>
+                books are in — come back for the cards
+              </Text>
+            </TouchableOpacity>
 
             <Text style={styles.section}>ON THE TABLE</Text>
             {DENOMINATIONS.map(d => (
@@ -147,35 +164,31 @@ export default function TeamScorePanel({
               tone="penalty"
             />
 
-            {showInHand || inHand > 0 ? (
-              <>
-                <Text style={styles.subsection}>LEFT IN HAND &amp; FOOT</Text>
-                {DENOMINATIONS.map(d => (
-                  <NumberField
-                    key={`h${d}`}
-                    label={denominationLabel(rules, d)}
-                    sub={`−${d} each`}
-                    value={round.inHand[d]}
-                    points={round.inHand[d] * d}
-                    onChange={n => setTally('inHand', d, n)}
-                    tone="penalty"
-                  />
-                ))}
-              </>
-            ) : (
-              // Usually one team goes out and the other is the only one holding
-              // anything, so this stays folded away rather than showing four
-              // zeroes to everybody every round.
-              <TouchableOpacity style={styles.addInHand} onPress={() => setShowInHand(true)}>
-                <Text style={styles.addInHandText} maxFontSizeMultiplier={BODY_FONT_SCALE}>
-                  + Cards left in hand
-                </Text>
-              </TouchableOpacity>
+            <Text style={styles.subsection}>LEFT IN HAND &amp; FOOT</Text>
+            <Text style={styles.subsectionNote} maxFontSizeMultiplier={BODY_FONT_SCALE}>
+              Everything still held when someone went out counts against you.
+            </Text>
+            {DENOMINATIONS.map(d => (
+              <NumberField
+                key={`h${d}`}
+                label={denominationLabel(rules, d)}
+                sub={`−${d} each`}
+                value={round.inHand[d]}
+                points={round.inHand[d] * d}
+                onChange={n => setTally('inHand', d, n)}
+                tone="penalty"
+              />
+            ))}
+            {inHand > 0 && (
+              <View style={styles.subtotal}>
+                <Text style={[styles.subtotalLabel, styles.negative]}>IN HAND</Text>
+                <Text style={[styles.subtotalValue, styles.negative]}>−{inHand}</Text>
+              </View>
             )}
 
             <View style={styles.totalRow}>
               <Text style={styles.totalLabel} maxFontSizeMultiplier={BODY_FONT_SCALE}>ROUND</Text>
-              <Text style={styles.totalValue}>{bd.total}</Text>
+              <Text style={[styles.totalValue, bd.total < 0 && styles.negative]}>{bd.total}</Text>
             </View>
 
             <TouchableOpacity style={styles.doneBtn} onPress={onClose}>
@@ -208,11 +221,13 @@ const styles = StyleSheet.create({
     paddingBottom: 8, borderBottomWidth: 1, borderBottomColor: C.border,
   },
   backTitle: { flex: 1, color: C.brass, fontSize: 17, fontWeight: '800' },
-  doneChip: {
-    paddingHorizontal: 12, paddingVertical: 6, borderRadius: 999,
-    borderWidth: 1, borderColor: C.borderStrong,
+  returnBtn: {
+    marginTop: 10, borderRadius: 12, borderWidth: 1, borderColor: C.brassDim,
+    backgroundColor: C.surface, alignItems: 'center', paddingVertical: 11,
   },
-  doneChipText: { color: C.textDim, fontSize: 11, fontWeight: '800', letterSpacing: 1.2 },
+  returnBtnText: { color: C.brass, fontSize: 14, fontWeight: '800', letterSpacing: 1.4 },
+  returnBtnSub: { color: C.textMuted, fontSize: 12, marginTop: 2 },
+  negative: { color: C.danger },
 
   section: {
     color: C.brassMuted, fontSize: 11, fontWeight: '800',
@@ -242,8 +257,7 @@ const styles = StyleSheet.create({
   goOutText: { color: C.textDim, fontSize: 14, fontWeight: '800', letterSpacing: 1 },
   goOutTextOn: { color: C.brass },
 
-  addInHand: { paddingVertical: 12 },
-  addInHandText: { color: C.dangerBorder, fontSize: 14, fontWeight: '700' },
+  subsectionNote: { color: C.textMuted, fontSize: 13, lineHeight: 18, marginBottom: 4 },
 
   totalRow: {
     flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',

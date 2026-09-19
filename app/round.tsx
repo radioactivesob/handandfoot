@@ -33,7 +33,22 @@ export default function RoundScreen() {
   const toTop = useCallback(() => scroller.current?.scrollTo({ y: 0, animated: false }), []);
 
   const game = current;
+
+  // Which round is on screen. Normally the one in progress, but a committed
+  // round can be reopened to fix a score — edits then go straight into
+  // game.rounds[viewIndex] and persist on every tap, exactly like the draft
+  // does, so there is no second save step to forget. `null` means live.
+  const [viewIndex, setViewIndex] = useState<number | null>(null);
+  const viewRef = useRef<number | null>(null);
+  useEffect(() => { viewRef.current = viewIndex; }, [viewIndex]);
+  useEffect(() => { setViewIndex(null); }, [game?.id]);
+
+  const liveIndex = game?.rounds.length ?? 0;
+  const revisiting = viewIndex != null && viewIndex < liveIndex;
+  const roundIndex = revisiting ? viewIndex! : liveIndex;
+
   const draft = useMemo(() => game?.draft ?? (game ? freshRound(game) : null), [game]);
+  const round: Round | null = revisiting ? (game?.rounds[viewIndex!] ?? null) : draft;
 
   // Two taps inside one render frame would both read the same `game` from
   // their closure, the second overwriting the first and silently losing a
@@ -45,7 +60,11 @@ export default function RoundScreen() {
   const applyDraft = useCallback((fn: (d: Round) => Round) => {
     const base = latest.current ?? game;
     if (!base) return;
-    const next: Game = { ...base, draft: fn(base.draft ?? freshRound(base)) };
+    const idx = viewRef.current;
+    const next: Game = idx != null && idx < base.rounds.length
+      // Fixing a past round: write it back in place. Later rounds untouched.
+      ? { ...base, rounds: base.rounds.map((r, i) => (i === idx ? fn(r) : r)) }
+      : { ...base, draft: fn(base.draft ?? freshRound(base)) };
     latest.current = next;
     saveCurrent(next);
   }, [game, saveCurrent]);
@@ -65,7 +84,7 @@ export default function RoundScreen() {
   }, [applyDraft]);
 
   if (loading) return <SafeAreaView style={styles.container} />;
-  if (!game || !draft) {
+  if (!game || !draft || !round) {
     return (
       <SafeAreaView style={styles.container}>
         <View style={styles.empty}>
@@ -78,12 +97,11 @@ export default function RoundScreen() {
     );
   }
 
-  const roundIndex = game.rounds.length;
   const rules = game.rules;
   const minimum = roundMinimum(rules, roundIndex);
   const endOfRound = prefs.scoringMode === 'endOfRound';
   const team = game.teams[teamIdx];
-  const tr = draft.teams.find(t => t.teamId === team.id) ?? emptyTeamRound(team.id);
+  const tr = round.teams.find(t => t.teamId === team.id) ?? emptyTeamRound(team.id);
   const bd = breakdown(tr, rules);
 
   const committed = totals(game);
@@ -125,7 +143,16 @@ export default function RoundScreen() {
     }));
   };
 
-  const dealtPlayers = draft.teams.flatMap(t => t.perfectDealBy);
+  const dealtPlayers = round.teams.flatMap(t => t.perfectDealBy);
+
+  const goToRound = (idx: number) => {
+    setViewIndex(idx >= liveIndex ? null : idx);
+    setOpenTeamId(null);
+    setTeamIdx(0);
+    // A past round already had its deal; the echo line covers changing it.
+    setShowDeal(idx >= liveIndex);
+    toTop();
+  };
 
   const swapMode = () => {
     savePrefs({ ...prefs, scoringMode: endOfRound ? 'asYouGo' : 'endOfRound' });
@@ -174,9 +201,12 @@ export default function RoundScreen() {
       <Scoreboard
         teams={live}
         roundIndex={roundIndex}
+        liveIndex={liveIndex}
         roundCount={roundCount(rules)}
         minimum={minimum}
         activeTeamId={endOfRound ? (openTeamId ?? undefined) : team.id}
+        onBack={roundIndex > 0 ? () => goToRound(roundIndex - 1) : undefined}
+        onForward={revisiting ? () => goToRound(roundIndex + 1) : undefined}
       />
 
       <ScrollView
@@ -225,7 +255,7 @@ export default function RoundScreen() {
           /* ---- count everything once, at the end ---- */
           <>
             {game.teams.map(t => {
-              const row = draft.teams.find(x => x.teamId === t.id) ?? emptyTeamRound(t.id);
+              const row = round.teams.find(x => x.teamId === t.id) ?? emptyTeamRound(t.id);
               return (
                 <TeamScorePanel
                   key={t.id}
@@ -235,15 +265,22 @@ export default function RoundScreen() {
                   minimum={minimum}
                   open={openTeamId === t.id}
                   onOpen={() => setOpenTeamId(t.id)}
-                  onClose={() => setOpenTeamId(null)}
+                  // The open face is ~1100pt taller than the closed one. A
+                  // ScrollView keeps its offset when content shrinks under
+                  // it, so closing from mid-panel would leave the screen
+                  // blank until the next touch. RETURN means "back to the
+                  // teams" anyway, so go there.
+                  onClose={() => { setOpenTeamId(null); toTop(); }}
                   onChange={replaceTeam}
                 />
               );
             })}
-            {dealtPlayers.length > 0 && (
+            {(dealtPlayers.length > 0 || revisiting) && !showDeal && (
               <TouchableOpacity style={styles.dealEcho} onPress={() => setShowDeal(true)}>
                 <Text style={styles.dealEchoText} maxFontSizeMultiplier={BODY_FONT_SCALE}>
-                  Perfect deal: {dealtPlayers.map(id => playerName(game, id)).join(', ')} — tap to change
+                  Perfect deal: {dealtPlayers.length
+                    ? dealtPlayers.map(id => playerName(game, id)).join(', ')
+                    : 'nobody'} — tap to change
                 </Text>
               </TouchableOpacity>
             )}
@@ -398,6 +435,12 @@ export default function RoundScreen() {
           >
             <Text style={styles.primaryBtnText} numberOfLines={1}>
               {teamLabel(game, game.teams[teamIdx + 1]).toUpperCase()} →
+            </Text>
+          </TouchableOpacity>
+        ) : revisiting ? (
+          <TouchableOpacity style={styles.primaryBtn} onPress={() => goToRound(liveIndex)}>
+            <Text style={styles.primaryBtnText} numberOfLines={1}>
+              ↩︎  BACK TO ROUND {liveIndex + 1}
             </Text>
           </TouchableOpacity>
         ) : (
