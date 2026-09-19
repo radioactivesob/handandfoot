@@ -96,8 +96,8 @@ too, so they'd waste characters.
     Privacy Policy URL:  https://radioactivesob.github.io/handandfoot/privacy.html
     Marketing URL:       (leave blank)
 
-Both pages live in `docs/` and need GitHub Pages turned on for this repo,
-the same as Crosscourt.
+Both are live — GitHub Pages serves `docs/` from `main`, the same as
+Crosscourt. Any push updates them.
 
 ## App Privacy (the nutrition label)
 
@@ -125,11 +125,9 @@ not required.
 ## Screenshots
 
 iPhone 6.9" only (1320 × 2868), since `supportsTablet` is off. Up to ten;
-the first three carry the listing. Captured from the iPhone 17 Pro Max
-simulator with a staged game — see `docs/screenshots/`.
-
-Captured from the Release build on the iPhone 17 Pro Max simulator, with a
-staged game: Ruth & Frank vs Carol & Dave. Files are in listing order.
+the first three carry the listing. Captured from the Release build on the
+iPhone 17 Pro Max simulator with a staged game — Ruth & Frank vs Carol &
+Dave. Files are in `docs/screenshots/`, named in listing order.
 
 1. `01-round.png` — the scoreboard, both team panels, the NEED pill.  *hero*
 2. `02-summary.png` — "Ruth & Frank win it", the round grid, the superlatives.
