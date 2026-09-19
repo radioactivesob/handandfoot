@@ -13,6 +13,7 @@ import Scoreboard from '../components/Scoreboard';
 import CountTile from '../components/CountTile';
 import FlipTile from '../components/FlipTile';
 import TeamScorePanel from '../components/TeamScorePanel';
+import MeldCheck from '../components/MeldCheck';
 import { C } from '../theme';
 
 const freshRound = (game: Game): Round => ({
@@ -29,6 +30,7 @@ export default function RoundScreen() {
   const [teamIdx, setTeamIdx] = useState(0);
   const [openTeamId, setOpenTeamId] = useState<string | null>(null);
   const [showDeal, setShowDeal] = useState(true);
+  const [meldCheck, setMeldCheck] = useState(false);
   const scroller = useRef<ScrollView>(null);
   const toTop = useCallback(() => scroller.current?.scrollTo({ y: 0, animated: false }), []);
 
@@ -209,8 +211,15 @@ export default function RoundScreen() {
           const idx = game.teams.findIndex(t => t.id === id);
           if (idx >= 0) setTeamIdx(idx);
         }}
+        onCheckMeld={() => setMeldCheck(true)}
         onBack={roundIndex > 0 ? () => goToRound(roundIndex - 1) : undefined}
         onForward={revisiting ? () => goToRound(roundIndex + 1) : undefined}
+      />
+      <MeldCheck
+        visible={meldCheck}
+        minimum={minimum}
+        roundNumber={roundIndex + 1}
+        onClose={() => setMeldCheck(false)}
       />
 
       <ScrollView

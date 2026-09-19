@@ -364,6 +364,31 @@ carry a faint outline so they read as tappable, the brass one is the one
 you're on, and the bottom bar is only SAVE ROUND. Noticed from the UI alone
 before the mode had been used in anger — worth a real test.
 
+**The meld check is a calculator behind the NEED line, not a flag on the
+score panel.** The end-of-round panel used to carry "N SHORT OF M / ✓ PAST
+MINIMUM" under its melded subtotal. The family loved the feature and noticed
+it was in the wrong place: the meld minimum is a question about a *hand* —
+"do I have enough to go down?" — asked mid-round by a player looking at
+cards they haven't played, and at a real table it gets counted two and three
+times before anyone is sure. By the time the end-of-round panel is being
+filled in, every team that melded already met it, so the flag could only
+ever say ✓; a legal game cannot even produce a melded total between 1 and
+the minimum.
+
+So the flag is off that panel (the as-you-go pad keeps its running version,
+where the total is the thing being watched), and the scoreboard's
+`NEED 120 TO MELD` line — where the question is already written — is now a
+pill that opens `MeldCheck`: the four denomination tiles, a running total,
+green with a checkmark at the minimum, RESET and DONE. It is a calculator,
+not a ledger: it writes nothing and starts empty every time it opens,
+because the previous player's hand is never the one you want. It reads the
+same `roundMinimum()` the scoreboard does, so it is 60 in round 1 and 150
+in round 4, and a reopened past round gets that round's number.
+
+Adding the pill made the scoreboard's meta line overflow when FIXING and
+both arrows were also present — clipped at both edges. It is two rows now:
+round and arrows, then the NEED pill.
+
 Two glyph notes from the same pass: `↩` has both text and emoji presentations
 and iOS picks the blue emoji tile; `↩\ufe0e` (the text-presentation selector)
 draws it as a glyph in the button's own colour. The same trap as the card

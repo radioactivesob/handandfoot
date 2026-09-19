@@ -16,6 +16,8 @@ interface Props {
   activeTeamId?: string;
   /** When set, the team tiles are the selector: tap one to score it. */
   onSelectTeam?: (teamId: string) => void;
+  /** Tapping the NEED line opens the meld calculator. */
+  onCheckMeld?: () => void;
   onBack?: () => void;
   onForward?: () => void;
 }
@@ -25,7 +27,9 @@ interface Props {
  *
  * The third line is the one that earns its keep: the meld minimum for this
  * round is the question actually asked out loud every round ("what do we need
- * to get down?"), and answering it permanently in chrome costs nothing.
+ * to get down?"), and answering it permanently in chrome costs nothing. It is
+ * also tappable, because the follow-up question — "do I *have* that?" — gets
+ * counted two and three times at a real table before anyone is sure.
  *
  * In count-as-you-go mode the two team tiles are also the team selector.
  * Both teams play at once and books go down in any order, so the pad has to
@@ -39,7 +43,8 @@ interface Props {
  * counted, and there was no way back.
  */
 export default function Scoreboard({
-  teams, roundIndex, liveIndex, roundCount, minimum, activeTeamId, onSelectTeam, onBack, onForward,
+  teams, roundIndex, liveIndex, roundCount, minimum, activeTeamId,
+  onSelectTeam, onCheckMeld, onBack, onForward,
 }: Props) {
   const revisiting = roundIndex < liveIndex;
   return (
@@ -69,6 +74,8 @@ export default function Scoreboard({
           );
         })}
       </View>
+      {/* Two rows, not one. With FIXING, both arrows, and the CHECK pill all
+          present, a single line overflows the phone and clips at both edges. */}
       <View style={styles.meta}>
         {onBack ? (
           <TouchableOpacity onPress={onBack} hitSlop={12} style={styles.arrow}>
@@ -83,8 +90,16 @@ export default function Scoreboard({
             <Text style={styles.arrowText}>→</Text>
           </TouchableOpacity>
         ) : <View style={styles.arrow} />}
-        <Text style={styles.dot}>·</Text>
-        <Text style={styles.minimum}>NEED {minimum} TO MELD</Text>
+      </View>
+      <View style={styles.meta}>
+        {onCheckMeld ? (
+          <TouchableOpacity onPress={onCheckMeld} hitSlop={8} style={styles.needBtn}>
+            <Text style={styles.minimum}>NEED {minimum} TO MELD</Text>
+            <Text style={styles.needHint}>·  CHECK</Text>
+          </TouchableOpacity>
+        ) : (
+          <Text style={styles.minimum}>NEED {minimum} TO MELD</Text>
+        )}
       </View>
     </View>
   );
@@ -121,6 +136,11 @@ const styles = StyleSheet.create({
   roundRevisiting: { color: C.brass },
   arrow: { width: 26, alignItems: 'center', justifyContent: 'center', paddingVertical: 2 },
   arrowText: { color: C.brass, fontSize: 15, fontWeight: '800' },
-  dot: { color: C.textGhost, fontSize: 11 },
   minimum: { color: C.brassMuted, fontSize: 11, fontWeight: '800', letterSpacing: 1.2 },
+  needBtn: {
+    flexDirection: 'row', alignItems: 'center', gap: 4,
+    paddingHorizontal: 10, paddingVertical: 3, borderRadius: 999,
+    borderWidth: 1, borderColor: C.borderStrong, marginTop: 3,
+  },
+  needHint: { color: C.brass, fontSize: 9, fontWeight: '800', letterSpacing: 1.2 },
 });
