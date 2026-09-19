@@ -306,6 +306,38 @@ is the detail that makes the app feel like it was built by someone who plays.
 | Rules | Every value in the table above, editable |
 | Export | JPEG smack-talk card + PDF record |
 
+## Next build
+
+From the first real game, Sept 2026. All three are the table correcting the
+design, and two of them correct decisions written above.
+
+**The penalty section must be permanently visible.** Cards left in hand and
+foot subtract at face value and the total goes negative — the model has always
+done this. But the panel hid the section behind a small `+ Cards left in hand`
+link, off by default, to keep the panel short. Nobody found a grey link with
+four people waiting, so a player caught with a full hand could not be scored
+and the table concluded the app "had no way to enter negatives." This is the
+compromise the locked decision above warned against: *the in-hand pad is
+styled in the danger palette and sits below a rule*. Do that. Always shown,
+red, labelled as the column that counts against you.
+
+**Rounds must be revisitable.** Round 2 was open when someone realised round 1
+had not been fully counted, and there was no way back. Crosscourt's set
+control is the pattern — `←` on the indicator. `← ROUND 1` in the scoreboard
+opens the saved round with both panels pre-filled; SAVE rewrites that round in
+place, later rounds are untouched, totals recompute, and the app returns to
+the round in progress. Saving a past round must never truncate the rounds
+after it.
+
+**One exit per phase, named for what it does.** The panel had two DONE buttons
+— a chip top-right and a button at the bottom — doing the identical thing. The
+table read them correctly as two *different* things and got confused that they
+weren't. The real flow at the table is: books first for both teams (they are
+the piles), then loose cards. So each panel is opened twice per round, and the
+first visit ends after BOOKS. Delete the top-right chip; put `↩ RETURN` directly
+after the BOOKS section; keep the big DONE at the end. Two exits, each at the
+end of its phase.
+
 ## Open items
 
 - **Name.** "Hand and Foot" is descriptive and unfindable; the sibling apps are
