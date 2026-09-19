@@ -13,7 +13,6 @@ interface Props {
   title: string;
   rules: RuleSet;
   round: TeamRound;
-  minimum: number;
   open: boolean;
   onOpen: () => void;
   onClose: () => void;
@@ -33,6 +32,13 @@ interface Props {
  * pass. The first version had two buttons both labelled DONE doing the same
  * thing, and the table read them — correctly — as two different things.
  *
+ * There is no meld-minimum check on this panel, on purpose. The minimum is a
+ * question about a hand — "do I have enough to go down?" — asked mid-round by
+ * a player looking at cards they haven't played. By the time this panel is
+ * being filled in, every team that melded already met it, so the flag could
+ * only ever say ✓. It lives on the count-as-you-go pad, where the running
+ * total is the thing being watched, and behind the scoreboard's NEED line.
+ *
  * The penalty section is always shown. It was folded behind a small link to
  * keep the panel short, and with four people waiting nobody found a grey link,
  * so a player caught with a full hand could not be scored at all. The moment
@@ -46,7 +52,7 @@ interface Props {
  * again when someone turns their phone's text size up.
  */
 export default function TeamScorePanel({
-  title, rules, round, minimum, open, onOpen, onClose, onChange,
+  title, rules, round, open, onOpen, onClose, onChange,
 }: Props) {
   const { face, flipStyle } = useHalfFlip(open);
 
@@ -135,9 +141,6 @@ export default function TeamScorePanel({
             <View style={styles.subtotal}>
               <Text style={styles.subtotalLabel}>MELDED</Text>
               <Text style={styles.subtotalValue}>{melded}</Text>
-              <Text style={[styles.minFlag, melded >= minimum ? styles.minOk : styles.minShort]}>
-                {melded >= minimum ? '✓ PAST MINIMUM' : `${minimum - melded} SHORT OF ${minimum}`}
-              </Text>
             </View>
 
             {rules.goOutEnabled && (
@@ -245,9 +248,6 @@ const styles = StyleSheet.create({
   },
   subtotalLabel: { color: C.textMuted, fontSize: 11, fontWeight: '800', letterSpacing: 1.2 },
   subtotalValue: { color: C.brassBright, fontSize: 20, fontWeight: '800' },
-  minFlag: { flex: 1, textAlign: 'right', fontSize: 11, fontWeight: '800' },
-  minOk: { color: C.good },
-  minShort: { color: C.textMuted },
 
   goOut: {
     marginTop: 12, borderRadius: 12, borderWidth: 1, borderColor: C.border,

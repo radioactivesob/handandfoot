@@ -266,7 +266,6 @@ export default function RoundScreen() {
                   title={teamLabel(game, t)}
                   rules={rules}
                   round={row}
-                  minimum={minimum}
                   open={openTeamId === t.id}
                   onOpen={() => setOpenTeamId(t.id)}
                   // The open face is ~1100pt taller than the closed one. A
