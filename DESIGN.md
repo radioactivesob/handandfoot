@@ -43,8 +43,9 @@ launch flows into the app without a seam.
 **On a phone via TestFlight** since Sept 2026, with credentials on the EAS
 server and an App Store Connect record (ASC app id `6809561558`, now in
 `eas.json`, so `eas submit --latest --non-interactive` needs no Apple login).
-**Build 5 (`2fddd87`) is the store-submission build** — Sept 19, 2026, the
-first one with `supportsTablet` off. Listing copy is in `docs/APP_STORE.md`,
+**Build 6 (`b62daa5`) is the store-submission build** — Sept 19, 2026. It
+supersedes build 5 with the deal-card blanking fix and the felt-green window
+background; `supportsTablet` has been off since build 5. Listing copy is in `docs/APP_STORE.md`,
 screenshots in `docs/screenshots/`, and the privacy and support pages are
 live on GitHub Pages. The store name is "Hand and Foot Game Buddy" — "Hand &
 Foot Score Keeper" was taken. The whole release path is non-interactive:
