@@ -5,27 +5,20 @@ from here. Fields marked *editable later* can change without a new build.
 
 ## Name  (30 max)
 
-The bare name "Hand & Foot" is almost certainly taken — App Store names are
-globally unique, and this is what renamed Crosscourt's record to
-"Crosscourt (957e5a)". **Check what the record is actually called in App Store
-Connect first.** Either way, Crosscourt's lesson applies: put the words people
-search into the Name field, which Apple weights most heavily.
+    Hand and Foot Game Buddy          (24)
 
-Recommended:
-
-    Hand & Foot Score Keeper          (24)
-
-Alternatives if that collides:
-
-    Hand and Foot Scorekeeper         (25)
-    Hand & Foot Scorer                (18)
+Chosen Sept 2026 after "Hand & Foot Score Keeper" turned out to be taken —
+App Store names are globally unique, the same trap that renamed Crosscourt's
+record. "Game Buddy" drops "score" from the Name field, which Apple weights
+most, so the subtitle carries it instead; Apple weights the subtitle second,
+and a search for "hand and foot score" still hits both.
 
 The home-screen name stays "Hand & Foot" regardless — `CFBundleDisplayName`
 comes from `expo.name` and is a separate field.
 
 ## Subtitle  (30 max)
 
-    Count the piles, not the math     (29)
+    Keep score, count the piles       (27)
 
 ## Promotional text  (170 max, *editable later*)
 
