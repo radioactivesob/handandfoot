@@ -152,14 +152,14 @@ const styles = StyleSheet.create({
   body: { padding: 16, gap: 10, paddingBottom: 28 },
   note: { color: C.textMuted, fontSize: 15, lineHeight: 21, marginBottom: 4 },
   seatRow: { flexDirection: 'row', alignItems: 'center', gap: 10 },
-  seatTag: { fontSize: 11, fontWeight: '800', letterSpacing: 1, width: 58 },
+  seatTag: { fontSize: 13, fontWeight: '800', letterSpacing: 1, width: 58 },
   seatTagA: { color: C.brass },
   seatTagB: { color: C.good },
   input: {
     flex: 1, backgroundColor: C.surface, borderRadius: 12, borderWidth: 1,
     borderColor: C.border, color: C.text, fontSize: 17, paddingHorizontal: 14, paddingVertical: 13,
   },
-  section: { color: C.brassMuted, fontSize: 11, fontWeight: '800', letterSpacing: 1.4, marginTop: 12 },
+  section: { color: C.brassMuted, fontSize: 13, fontWeight: '800', letterSpacing: 1.4, marginTop: 12 },
   chips: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
   chip: {
     paddingVertical: 8, paddingHorizontal: 14, borderRadius: 999,

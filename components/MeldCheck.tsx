@@ -93,7 +93,7 @@ const styles = StyleSheet.create({
   sub: { color: C.textDim, fontSize: 15, lineHeight: 21, marginTop: 4, marginBottom: 14 },
   pad: { flexDirection: 'row', gap: 8 },
   hint: {
-    color: C.textFaint, fontSize: 11, fontWeight: '700',
+    color: C.textFaint, fontSize: 13, fontWeight: '700',
     letterSpacing: 1, textAlign: 'center', marginTop: 8,
   },
   totalRow: {

@@ -469,19 +469,19 @@ const styles = StyleSheet.create({
 
   teamHead: { marginTop: 4 },
   teamHeadName: { color: C.text, fontSize: 20, fontWeight: '800' },
-  teamHeadStep: { color: C.textMuted, fontSize: 11, fontWeight: '800', letterSpacing: 1.2, marginTop: 1 },
+  teamHeadStep: { color: C.textMuted, fontSize: 13, fontWeight: '800', letterSpacing: 1.2, marginTop: 1 },
 
-  section: { color: C.brassMuted, fontSize: 11, fontWeight: '800', letterSpacing: 1.4, marginTop: 6 },
+  section: { color: C.brassMuted, fontSize: 13, fontWeight: '800', letterSpacing: 1.4, marginTop: 6 },
   sectionDanger: { color: C.danger },
-  subsection: { color: C.danger, fontSize: 11, fontWeight: '800', letterSpacing: 1.2, marginTop: 2 },
+  subsection: { color: C.danger, fontSize: 13, fontWeight: '800', letterSpacing: 1.2, marginTop: 2 },
   pad: { flexDirection: 'row', gap: 8 },
   row: { flexDirection: 'row', gap: 8 },
   rowCol: { flex: 1, gap: 8 },
 
   subtotalRow: { flexDirection: 'row', alignItems: 'center', gap: 8, paddingHorizontal: 2 },
-  subtotalLabel: { color: C.textMuted, fontSize: 11, fontWeight: '800', letterSpacing: 1.2 },
+  subtotalLabel: { color: C.textMuted, fontSize: 13, fontWeight: '800', letterSpacing: 1.2 },
   subtotalValue: { color: C.brassBright, fontSize: 20, fontWeight: '800' },
-  minFlag: { fontSize: 11, fontWeight: '800', letterSpacing: 0.8, marginLeft: 'auto' },
+  minFlag: { fontSize: 13, fontWeight: '800', letterSpacing: 0.8, marginLeft: 'auto' },
   minFlagOk: { color: C.good },
   minFlagShort: { color: C.textMuted },
 
@@ -496,7 +496,7 @@ const styles = StyleSheet.create({
     borderRadius: 12, borderWidth: 1, borderColor: C.border,
     alignItems: 'center', justifyContent: 'center', paddingVertical: 10,
   },
-  undoBooksText: { color: C.textFaint, fontSize: 11, fontWeight: '800', letterSpacing: 1 },
+  undoBooksText: { color: C.textFaint, fontSize: 13, fontWeight: '800', letterSpacing: 1 },
 
   dealEcho: { paddingVertical: 4 },
   dealEchoText: { color: C.brassMuted, fontSize: 13 },
@@ -517,7 +517,7 @@ const styles = StyleSheet.create({
   modeSwapText: { color: C.brassMuted, fontSize: 13, textAlign: 'center' },
 
   quit: { alignItems: 'center', paddingTop: 20 },
-  quitText: { color: C.dangerBorder, fontSize: 11, fontWeight: '800', letterSpacing: 1.4 },
+  quitText: { color: C.dangerBorder, fontSize: 13, fontWeight: '800', letterSpacing: 1.4 },
 
   bottomBar: {
     flexDirection: 'row', gap: 10, padding: 10,

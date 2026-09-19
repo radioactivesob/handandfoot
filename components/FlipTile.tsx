@@ -92,7 +92,7 @@ const styles = StyleSheet.create({
   back: { flex: 1, justifyContent: 'center', paddingVertical: 8, paddingHorizontal: 8 },
   label: { color: C.brassMuted, fontSize: 12, fontWeight: '800', letterSpacing: 1.4 },
   summary: { color: C.brass, fontSize: 20, fontWeight: '800', marginTop: 6, textAlign: 'center' },
-  hint: { color: C.textFaint, fontSize: 10, fontWeight: '700', letterSpacing: 1, marginTop: 8 },
+  hint: { color: C.textFaint, fontSize: 12, fontWeight: '700', letterSpacing: 1, marginTop: 8 },
   options: { flexDirection: 'row', gap: 8, minHeight: 84 },
   option: {
     flex: 1,
@@ -107,7 +107,7 @@ const styles = StyleSheet.create({
   optionLabel: { color: C.text, fontSize: 15, fontWeight: '800', textAlign: 'center' },
   optionSub: { color: C.brassMuted, fontSize: 12, fontWeight: '700', marginTop: 3 },
   cancel: {
-    color: C.textFaint, fontSize: 11, fontWeight: '800',
+    color: C.textFaint, fontSize: 13, fontWeight: '800',
     letterSpacing: 1.2, textAlign: 'center', paddingTop: 6,
   },
 });

@@ -394,6 +394,75 @@ and iOS picks the blue emoji tile; `↩\ufe0e` (the text-presentation selector)
 draws it as a glyph in the button's own colour. The same trap as the card
 icons rule in the conventions, from the other direction.
 
+## Low vision
+
+Sept 2026, before build 4. The app's likely audience beyond the family is
+retired players, and the first question from that direction was "what about
+people who can't see well?" Measured, not guessed.
+
+**Contrast.** The primary tier — row labels, totals, brass numbers — was
+already strong (7.6–15:1). The muted tier was not, and some of it was
+load-bearing: `brassDim`, the colour on TAP TO SCORE, the one cue that says a
+panel is tappable, was **1.9:1**. Section headers (`brassMuted`, 3.4:1) and
+sub-labels like "50 each" (`textMuted`, 3.6:1) failed AA at their sizes. Each
+was lifted along its own hue to the smallest lightness that clears 4.5:1
+against the felt, so the brass is still brass and the red is still red. The
+running "−500" readout beside penalty rows was using `dangerBorder` as text
+(≈1.7:1); it uses `danger` now.
+
+```bash
+# the check — rerun it if any of these tokens move
+python3 - <<'EOF'
+def lum(h):
+    h=h.lstrip('#'); r,g,b=[int(h[i:i+2],16)/255 for i in (0,2,4)]
+    f=lambda c: c/12.92 if c<=0.03928 else ((c+0.055)/1.055)**2.4
+    return 0.2126*f(r)+0.7152*f(g)+0.0722*f(b)
+def ratio(a,b):
+    a,b=sorted((lum(a),lum(b)),reverse=True); return (a+0.05)/(b+0.05)
+for name,c in [('brassMuted','#A98234'),('textMuted','#8D8576'),('textFaint','#8D8677'),
+               ('brassDim','#A8813A'),('danger','#D7605B')]:
+    print(f"{name:12s} {ratio(c,'#0C2018'):.1f}")
+EOF
+```
+
+**Larger Text.** The cap in `AppText` is **1.6**, not Crosscourt's 1.3. This
+app's densest thing is a row of four count tiles, and it holds at 1.6 all the
+way up to `accessibility-extra-extra-extra-large` — the largest setting iOS
+offers — on a cold start at that size. The scoreboard keeps both scores
+intact and truncates the team names with an ellipsis, which is the right
+thing to lose. The `+500 each` sub-label used to truncate to "+50…", which is
+a misread rather than a cosmetic cut; it wraps to two lines now.
+
+**One trap in testing it.** Changing the text size under a *running* app
+makes React Native re-render text at the new size without re-measuring
+layout, so every number's tail is clipped — `-1000` reads `-100`. That is an
+artifact of the live change, not a bug users hit: real people set the size
+once and open apps afterward. Always cold-start at the size under test:
+
+```bash
+xcrun simctl ui <udid> content_size accessibility-extra-extra-extra-large
+xcrun simctl terminate <udid> com.handandfoot.scorer && <relaunch>
+xcrun simctl ui <udid> content_size large     # back to the iOS default
+```
+
+**Size floor.** Nothing renders below 12px; section labels are 13. There were
+thirty instances at 9–11px.
+
+**Touch targets.** The stepper buttons were 38pt wide; they are 46×48 now.
+Apple's floor is 44, and an older hand aims at what it can see — hitSlop
+widens the target but not the confidence.
+
+Not done, and worth knowing about:
+
+- **A light theme.** Some people with cataracts prefer dark-on-light because
+  bright text on a dark ground scatters. It is a real preference and a big
+  change to the design language; it should be a decision, not a drive-by.
+- **Long-press to remove** on the count-as-you-go tiles is a hidden gesture
+  with timing, which is hard with a tremor. The family's mode has explicit
+  − buttons. If as-you-go gets real use from this audience, give it buttons.
+- **VoiceOver** has labels on the fields and tiles but has not been walked
+  end to end.
+
 ## Open items
 
 - **Name.** "Hand and Foot" is descriptive and unfindable; the sibling apps are

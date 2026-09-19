@@ -54,7 +54,7 @@ export default function NumberField({
           {label}
         </Text>
         {!!sub && (
-          <Text style={styles.sub} maxFontSizeMultiplier={BODY_FONT_SCALE} numberOfLines={1}>
+          <Text style={styles.sub} maxFontSizeMultiplier={BODY_FONT_SCALE} numberOfLines={2}>
             {sub}
           </Text>
         )}
@@ -111,16 +111,19 @@ const styles = StyleSheet.create({
   labelPenalty: { color: C.dangerBright },
   sub: { color: C.textMuted, fontSize: 12, marginTop: 1 },
   points: { color: C.brassMuted, fontSize: 13, fontWeight: '700' },
-  pointsPenalty: { color: C.dangerBorder },
+  pointsPenalty: { color: C.danger },
   stepper: { flexDirection: 'row', alignItems: 'center', gap: 2 },
+  // 46×48, not the 38×44 it started at. Apple's floor is 44, and an older
+  // hand aims at what it can see — hitSlop widens the target but not the
+  // confidence.
   stepBtn: {
-    width: 38, height: 44, borderRadius: 10,
+    width: 46, height: 48, borderRadius: 10,
     alignItems: 'center', justifyContent: 'center',
     backgroundColor: C.surfaceRaised, borderWidth: 1, borderColor: C.border,
   },
   stepText: { color: C.brass, fontSize: 22, fontWeight: '800', lineHeight: 26 },
   input: {
-    width: 62, height: 44, textAlign: 'center',
+    width: 70, height: 48, textAlign: 'center',
     color: C.brass, fontSize: 20, fontWeight: '800',
     backgroundColor: C.surface, borderWidth: 1, borderColor: C.borderStrong,
     borderRadius: 10, paddingVertical: 0,

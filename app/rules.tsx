@@ -200,7 +200,7 @@ const styles = StyleSheet.create({
   modeTitleOn: { color: C.brass },
   modeBlurb: { color: C.textMuted, fontSize: 13, lineHeight: 19, marginTop: 3 },
   noticeBold: { color: C.brass, fontWeight: '800' },
-  section: { color: C.brassMuted, fontSize: 11, fontWeight: '800', letterSpacing: 1.4, marginTop: 22, marginBottom: 4 },
+  section: { color: C.brassMuted, fontSize: 13, fontWeight: '800', letterSpacing: 1.4, marginTop: 22, marginBottom: 4 },
   row: {
     flexDirection: 'row', alignItems: 'center', gap: 12,
     paddingVertical: 11, borderBottomWidth: 1, borderBottomColor: C.border,
@@ -224,7 +224,7 @@ const styles = StyleSheet.create({
   refRow: { flexDirection: 'row', justifyContent: 'space-between', paddingVertical: 5 },
   refLabel: { color: C.textDim, fontSize: 14 },
   refValue: { color: C.brass, fontSize: 15, fontWeight: '800' },
-  refNote: { color: C.textFaint, fontSize: 11, lineHeight: 16, marginTop: 10 },
+  refNote: { color: C.textFaint, fontSize: 13, lineHeight: 16, marginTop: 10 },
   reset: { alignItems: 'center', paddingTop: 30 },
-  resetText: { color: C.dangerBorder, fontSize: 11, fontWeight: '800', letterSpacing: 1.4 },
+  resetText: { color: C.dangerBorder, fontSize: 13, fontWeight: '800', letterSpacing: 1.4 },
 });

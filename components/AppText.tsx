@@ -5,13 +5,18 @@ import {
 } from 'react-native';
 
 // iOS Dynamic Type scales text up to ~3x at the largest accessibility
-// sizes. This app is deliberately dense — scoreboards, stat grids, box
-// score tables — and none of that survives 3x. Capping the multiplier
+// sizes, and nothing with a fixed layout survives 3x. Capping the multiplier
 // keeps large-text users supported without shattering the layout.
+//
+// 1.6, not Crosscourt's 1.3. This app's densest thing is a row of four
+// count tiles, and it holds at 1.6 all the way up to the largest
+// accessibility size (verified on a cold start at that setting — changing
+// the size under a running app mis-measures text and is not a real test).
+// The likely audience has their text turned all the way up.
 //
 // Screens that genuinely can't grow (big score numerals, tight table
 // cells) pass a smaller cap or numberOfLines themselves.
-export const MAX_FONT_SCALE = 1.3;
+export const MAX_FONT_SCALE = 1.6;
 
 // Navigation chrome is fixed-height and packed — it scales less than
 // content, the same tradeoff Apple's own nav bars make.

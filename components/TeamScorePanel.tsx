@@ -216,7 +216,7 @@ const styles = StyleSheet.create({
   frontTitle: { flex: 1, color: C.text, fontSize: 18, fontWeight: '800' },
   frontScore: { color: C.brass, fontSize: 30, fontWeight: '800' },
   frontSummary: { color: C.textMuted, fontSize: 14, lineHeight: 20 },
-  frontHint: { color: C.brassDim, fontSize: 11, fontWeight: '800', letterSpacing: 1.4, marginTop: 4 },
+  frontHint: { color: C.brassDim, fontSize: 13, fontWeight: '800', letterSpacing: 1.4, marginTop: 4 },
 
   back: { padding: 14, paddingBottom: 12 },
   backHead: {
@@ -233,12 +233,12 @@ const styles = StyleSheet.create({
   negative: { color: C.danger },
 
   section: {
-    color: C.brassMuted, fontSize: 11, fontWeight: '800',
+    color: C.brassMuted, fontSize: 13, fontWeight: '800',
     letterSpacing: 1.4, marginTop: 14, marginBottom: 2,
   },
   sectionDanger: { color: C.danger },
   subsection: {
-    color: C.danger, fontSize: 11, fontWeight: '800',
+    color: C.danger, fontSize: 13, fontWeight: '800',
     letterSpacing: 1.2, marginTop: 8, marginBottom: 2,
   },
 
@@ -246,7 +246,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row', alignItems: 'center', gap: 10,
     marginTop: 8, paddingTop: 8, borderTopWidth: 1, borderTopColor: C.border,
   },
-  subtotalLabel: { color: C.textMuted, fontSize: 11, fontWeight: '800', letterSpacing: 1.2 },
+  subtotalLabel: { color: C.textMuted, fontSize: 13, fontWeight: '800', letterSpacing: 1.2 },
   subtotalValue: { color: C.brassBright, fontSize: 20, fontWeight: '800' },
 
   goOut: {

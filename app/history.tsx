@@ -89,5 +89,5 @@ const styles = StyleSheet.create({
   lineName: { color: C.textDim, fontSize: 15, flex: 1 },
   lineScore: { color: C.textMuted, fontSize: 19, fontWeight: '800' },
   lineScoreWin: { color: C.brass },
-  hint: { color: C.textFaint, fontSize: 11, textAlign: 'center', paddingTop: 8 },
+  hint: { color: C.textFaint, fontSize: 13, textAlign: 'center', paddingTop: 8 },
 });
