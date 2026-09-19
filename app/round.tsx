@@ -237,25 +237,31 @@ export default function RoundScreen() {
             <Text style={styles.dealSub} maxFontSizeMultiplier={BODY_FONT_SCALE}>
               Anyone draw two piles of exactly 13? +{rules.perfectDeal} each.
             </Text>
-            <View style={styles.chips}>
-              {game.players.map(p => {
-                const on = dealtPlayers.includes(p.id);
-                return (
-                  <TouchableOpacity
-                    key={p.id}
-                    style={[styles.chip, on && styles.chipOn]}
-                    onPress={() => togglePerfectDeal(p.id)}
-                  >
-                    <Text
-                      style={[styles.chipText, on && styles.chipTextOn]}
-                      maxFontSizeMultiplier={BODY_FONT_SCALE}
+            {/* One row per team, chips evenly split — the rows then read the
+                same as the scoreboard above. A flow layout wrapped four
+                names as three-and-one whenever they ran long. */}
+            {game.teams.map(t => (
+              <View key={t.id} style={styles.chipRow}>
+                {t.playerIds.map(id => {
+                  const on = dealtPlayers.includes(id);
+                  return (
+                    <TouchableOpacity
+                      key={id}
+                      style={[styles.chip, on && styles.chipOn]}
+                      onPress={() => togglePerfectDeal(id)}
                     >
-                      {p.name}
-                    </Text>
-                  </TouchableOpacity>
-                );
-              })}
-            </View>
+                      <Text
+                        style={[styles.chipText, on && styles.chipTextOn]}
+                        maxFontSizeMultiplier={BODY_FONT_SCALE}
+                        numberOfLines={1}
+                      >
+                        {playerName(game, id)}
+                      </Text>
+                    </TouchableOpacity>
+                  );
+                })}
+              </View>
+            ))}
             <TouchableOpacity onPress={() => setShowDeal(false)}>
               <Text style={styles.dealDone}>
                 {dealtPlayers.length > 0 ? 'DONE' : 'NOBODY — SKIP'}
@@ -457,9 +463,10 @@ const styles = StyleSheet.create({
   },
   dealTitle: { color: C.brass, fontSize: 14, fontWeight: '800', letterSpacing: 1.4 },
   dealSub: { color: C.textDim, fontSize: 14, lineHeight: 20 },
-  chips: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
+  chipRow: { flexDirection: 'row', gap: 10, marginTop: 8 },
   chip: {
-    paddingVertical: 10, paddingHorizontal: 16, borderRadius: 999,
+    flex: 1, alignItems: 'center',
+    paddingVertical: 10, paddingHorizontal: 12, borderRadius: 999,
     borderWidth: 1, borderColor: C.border, backgroundColor: C.surfaceRaised,
   },
   chipOn: { borderColor: C.brass, backgroundColor: C.brassFaint },

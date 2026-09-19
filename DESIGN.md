@@ -253,6 +253,25 @@ The lesson generalises past this app: **animate with a transform, then take the
 transform away.** Anything left in a 3D transform at rest pays for it in text
 quality.
 
+**And then the second half of the same bug, on the phone only.** The panel
+above the one being tapped — the Perfect Deal card — still went half black,
+or all black, for a moment. The at-rest fix cured the text; it did not touch
+the 260ms of animation, which still rotated in 3D with `perspective`. A
+perspective rotation is not confined to the view's rectangle: the edge
+swinging toward the viewer projects outward over the sibling above, Core
+Animation composites the overlap in an offscreen pass, and on a real GPU the
+covered region of that sibling can drop out for a frame and show the
+window background — which was black. Left half when the near edge was on the
+left; the whole card when the projected bounds swallowed it. It never once
+reproduced in the simulator.
+
+Two fixes, belt and braces. `useHalfFlip` now animates `scaleX` — a plain
+affine transform with no 3D context, nothing projected outside the bounds,
+nothing to composite offscreen; it still reads as a card turning. And
+`expo.backgroundColor` in `app.json` is the felt green, so if anything ever
+drops out again it shows green on green rather than black. That one is
+native config and takes a build.
+
 **Row labels come from the rules, not from the code.** The panel names each
 denomination with the ranks that earn it — "Joker", "Deuce, Ace", "10 – King",
 "4 – 9, Black three" — derived from `cardValues` by grouping on value. A house
@@ -353,6 +372,11 @@ flow is books first for both teams (they are the piles), then loose cards, so
 each panel is opened twice a round and the first visit ends after BOOKS. The
 chip is gone; `↩ RETURN` sits directly after BOOKS with "books are in — come
 back for the cards" under it; the big DONE stays at the end of the pass.
+
+**Perfect-deal chips are one row per team.** A flow layout wrapped four
+names as three-and-one whenever they ran long — the family's names are longer
+than the test names, so the phone showed it and the simulator did not. Rows
+now match the scoreboard's pairs.
 
 **Closing a panel scrolls to the top.** Found while verifying the above, and
 almost certainly in build 3 as well. The open face is ~1100pt taller than the
