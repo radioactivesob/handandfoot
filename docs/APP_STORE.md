@@ -46,6 +46,9 @@ The question asked at every table, every round, usually three times. Tap the "Ne
 YOUR HOUSE RULES
 Round minimums, clean and dirty book values, what a red three costs, the perfect-deal bonus, the go-out bonus. Change any of them. Rules are saved with each game, so changing them next Thanksgiving never rewrites last year's scores.
 
+NEW TO THE GAME?
+How to Play walks a first-timer through the whole thing — the deal, melds, books, getting down, your foot, going out, and what every card is worth. It reads your house rules as it goes, so a newcomer learns the game your table actually plays instead of a generic version of it.
+
 BUILT FOR THE TABLE
 The scoreboard stays at the top of every screen: both totals, the round, and what you need to meld. Text follows your phone's Larger Text setting and stays sharp. Every colour was checked for contrast — the people this was built for have their text turned all the way up.
 
@@ -66,7 +69,7 @@ No account. No ads. No analytics. Every game is stored on your phone and nowhere
 
 ---
 
-(2,076 characters)
+(2,372 characters)
 
 ## Keywords  (100 max, comma-separated, no spaces)
 
@@ -88,7 +91,14 @@ too, so they'd waste characters.
 
 ## What's New  (4000 max, *editable later*)
 
-    First release.
+Paste for the How to Play release:
+
+    How to Play — a complete walkthrough of the game for anyone who has
+    never played it. The deal, melds, books, getting down, your foot,
+    going out, and what every card is worth. It follows your own house
+    rules as it goes, so a newcomer learns the game your table plays.
+
+    Deck count is now a house rule you can set.
 
 ## URLs
 

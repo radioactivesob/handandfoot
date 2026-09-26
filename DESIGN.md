@@ -651,6 +651,46 @@ grep ^OTHER_LDFLAGS "ios/Pods/Target Support Files/Pods-HandFoot/Pods-HandFoot.r
   | tr ' ' '\n' | grep -i dev-
 ```
 
+**Bump `expo.version` for every release after the first.** Apple rejected
+build 7 at processing — before TestFlight, so the binary never appeared
+anywhere:
+
+```
+ITMS-90186: Invalid Pre-Release Train — the train version '1.0.0' is
+            closed for new build submissions
+ITMS-90062: CFBundleShortVersionString [1.0.0] must be higher than the
+            previously approved version [1.0.0]
+```
+
+Two numbers are in play and only one of them was moving. `autoIncrement:
+true` with `appVersionSource: "remote"` manages the **build number**
+(`CFBundleVersion` — 5, 6, 7…) on the EAS server, which is why builds kept
+going out without complaint. The **marketing version**
+(`CFBundleShortVersionString`) comes from `expo.version` in `app.json` and
+had sat at `1.0.0` since the beginning. That was fine while 1.0.0 was
+unreleased — every build was a new candidate for the same unshipped version.
+The moment Apple approved and released it, the train closed.
+
+So: **`expo.version` has to move before the first build of any release after
+a version goes live.** Nothing automates it, and the failure arrives by email
+an hour later rather than at build time. It also means a matching **new
+version page in App Store Connect** — a build cannot attach to a version
+that has already shipped.
+
+**`expo install --fix` breaks the next local build.** Aligning patch versions
+rewrites `package.json` but leaves `ios/Podfile.lock` pinned to the old ones,
+so the next `expo run:ios` dies in `pod install` with a "native package
+versions mismatching" message that reads like a dependency problem and is
+really just a stale lockfile. Hit twice now, both times right after a
+version alignment. `/ios` is generated and git-ignored, so the fix costs
+nothing:
+
+```bash
+npx expo prebuild --platform ios --clean
+```
+
+Cloud builds never see this — EAS runs prebuild itself from `app.json`.
+
 **`expo run:ios` does NOT re-run prebuild when `ios/` already exists**, so an
 `app.json` change silently fails to reach `Info.plist`. After editing it:
 
