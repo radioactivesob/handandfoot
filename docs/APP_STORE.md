@@ -146,7 +146,17 @@ Dave. Files are in `docs/screenshots/`, named in listing order.
    point readouts, 18 fives → +90.
 4. `04-meld-check.png` — "Can I meld?" reading 155, green, checkmark.
 5. `05-rules.png` — House Rules: counting mode, round minimums, book values.
-6. `06-home.png` — Home.
+6. `06-home.png` — Home, now showing the HOW TO PLAY card.
 
 Upload in that order. No captions or device frames — plain screenshots are
 accepted, and the app's own chrome carries the story.
+
+Home stays sixth by choice. Moving it into the top three would put the
+HOW TO PLAY card in front of people browsing search results, since only the
+first three show there — but home is a menu, and it would displace a frame
+that actually sells the app. Reconsider if How to Play turns out to be what
+brings people in.
+
+Re-shoot with the staged game, never a real one: the published set is Ruth &
+Frank vs Carol & Dave throughout, and a frame carrying the family's own
+names would be both inconsistent and public.
