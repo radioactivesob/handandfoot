@@ -542,6 +542,22 @@ were wrong, all of them the kind of thing only a player would catch:
   hand or foot counts against its holder, so a red three buried in an
   unplayed foot is −500 that never saw the table.
 
+A second read-through in the simulator caught two more:
+
+- **A book is finished, not closed.** The text said "nothing more goes on
+  it", which is wrong and actively harmful to a beginner: matching cards
+  keep going onto a book, so a book of fives becomes eight or nine. If books
+  really shut you would end up holding cards with nowhere to put them and be
+  unable to play your hand out. The extras also score — the app's model
+  already handles this, since a round counts book bonuses *and* the face
+  value of everything on the table, so the eighth five lands in the 5s row
+  like any other card.
+- **"Your turn is over" was only half true.** It ends if the last card went
+  to the discard pile. Emptying the hand onto the table with nothing left to
+  discard is the *play right into your foot* case, and the turn continues.
+  The section now splits on how the hand ran out rather than stating the
+  common case and hedging afterwards.
+
 Confirmed as written: draw two and discard one, wilds never outnumbering
 naturals, and seven cards to a book.
 

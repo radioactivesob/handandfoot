@@ -120,26 +120,39 @@ export default function HowToPlay() {
         <Section>BOOKS</Section>
         <P>
           Seven cards of one rank is a <B>book</B> — some tables call it a
-          pile. Square it up and leave it closed; nothing more goes on it.
+          pile. Square it up and mark it, so everyone can see what it is
+          without counting.
         </P>
         <P>
           <B>Clean</B> means no wilds in it, and it is worth{' '}
-          <B>+{r.cleanBook}</B>. Put a red card on top so everyone can see.{' '}
+          <B>+{r.cleanBook}</B>. Put a red card on top.{' '}
           <B>Dirty</B> means it contains a wild, and it is worth{' '}
           <B>+{r.dirtyBook}</B>. Black card on top.
+        </P>
+        <P>
+          A book is finished, but it is not closed — <B>you can keep laying
+          matching cards on it</B>. A book of fives will happily become eight
+          or nine cards. That matters more than it sounds: if books were shut
+          for good you would end up stuck holding cards with nowhere to put
+          them. The extras still count their face value at the end, on top of
+          the book bonus.
         </P>
 
         <Section>YOUR FOOT</Section>
         <P>
-          When the last card of your hand is gone, pick your foot up — but
-          your turn is over. You start playing out of it on your{' '}
-          <B>next</B> turn.
+          When your hand runs out you pick your foot up. What happens next
+          depends on <B>how</B> it ran out.
         </P>
         <P>
-          Unless you <B>play right into your foot</B>: get rid of every card
-          in your hand onto the table with nothing left to discard, and you
-          pick the foot up and carry straight on in the same turn. It is the
-          best thing that can happen to you all night.
+          If your last card went onto the discard pile, that was your turn —
+          the foot sits there and you start playing out of it next time
+          around.
+        </P>
+        <P>
+          But if you <B>play right into your foot</B> — every card in your
+          hand onto the table, nothing left to discard — you pick it up and
+          carry straight on in the same turn. It is the best thing that can
+          happen to you all night.
         </P>
 
         <Section>GOING OUT</Section>
