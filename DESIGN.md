@@ -505,6 +505,30 @@ which for this layout is the better experience. A real iPad layout (a
 centred column, or two panels side by side) is a proper follow-up; flipping
 the flag back on is trivial once one exists. Native config: takes a build.
 
+**How to Play** (Sept 26, 2026, after release). The app was built by people
+who already knew the game and assumed it on every screen — you could keep a
+flawless score without ever being told what a book is. `app/howtoplay.tsx` is
+the missing half, reached from a card on home that sits with House Rules
+because both are reference rather than play.
+
+Every number in the prose is **read from the saved rules**, not written into
+the text: round count, minimums, book values, the perfect-deal and go-out
+bonuses, and the card table. A novice is therefore taught the game *this*
+table plays. Generic numbers in the text would have taught one game while the
+app scored another, which is worse than saying nothing. Verified by adding a
+round in House Rules and watching the lede go from "Over 4 rounds" to "Over 5"
+with a fifth minimum cell. It reloads on focus for the same reason — the page
+links out to House Rules, and coming back to stale numbers would make a liar
+of its own closing note.
+
+What is *not* configurable is the procedure — draw two, meld, discard one;
+seven to a book; wilds never outnumbering naturals. Hand and Foot varies
+wildly house to house and the app has no opinion on any of it, so those
+sections state the common form, the foot and go-out sections say out loud
+that houses differ, and the closing note points at House Rules. **The
+procedural text has not been checked against how the family actually plays**
+— worth one read-through by someone at the table.
+
 ## Open items
 
 - **Name.** "Hand and Foot" is descriptive and unfindable; the sibling apps are

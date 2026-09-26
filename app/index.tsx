@@ -73,6 +73,18 @@ export default function Home() {
             <Text style={styles.cardDesc}>Minimums, books, red threes, bonuses.</Text>
           </View>
         </TouchableOpacity>
+
+        {/* Reference, so it sits with House Rules rather than above the
+            game. The app was built by people who already knew the rules and
+            assumed it on every screen; this is for whoever gets handed the
+            phone. */}
+        <TouchableOpacity style={styles.card} onPress={() => router.push('/howtoplay')}>
+          <Text style={styles.cardIcon}>🎓</Text>
+          <View style={styles.cardText}>
+            <Text style={styles.cardTitle}>HOW TO PLAY</Text>
+            <Text style={styles.cardDesc}>New to the game? Start here.</Text>
+          </View>
+        </TouchableOpacity>
       </ScrollView>
     </SafeAreaView>
   );
