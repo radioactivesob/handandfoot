@@ -97,6 +97,14 @@ export default function Rules() {
           })}
         </View>
 
+        <Text style={styles.section}>THE DEAL</Text>
+        <NumberRow
+          label="Decks"
+          help="Shuffled together, jokers included. Scoring never reads this — it is here so How to Play can tell a newcomer what to shuffle."
+          value={r.decks}
+          onChange={n => edit({ decks: n })}
+        />
+
         <Text style={styles.section}>ROUND MINIMUMS</Text>
         {r.roundMinimums.map((m, i) => (
           <NumberRow key={i} label={`Round ${i + 1}`} value={m} onChange={n => setMinimum(i, n)} />

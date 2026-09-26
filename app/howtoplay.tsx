@@ -68,11 +68,10 @@ export default function HowToPlay() {
 
         <Section>THE DEAL</Section>
         <P>
-          Several decks are shuffled together — five is usual for four
-          players, jokers included. Everyone takes <B>two stacks of 13</B>:
-          one is your <B>hand</B>, the other is your <B>foot</B>. You play the
-          hand first and the foot is waiting underneath. That is the name of
-          the game.
+          <B>{r.decks} decks</B> shuffled together, jokers included. Everyone
+          takes <B>two stacks of 13</B>: one is your <B>hand</B>, the other is
+          your <B>foot</B>. You play the hand first and the foot waits
+          underneath. That is the name of the game.
         </P>
         {r.perfectDeal !== 0 && (
           <P>
@@ -132,18 +131,30 @@ export default function HowToPlay() {
 
         <Section>YOUR FOOT</Section>
         <P>
-          When the last card of your hand is gone, pick up your foot and keep
-          playing. Some houses make you earn it with a book first — settle
-          that before you deal.
+          When the last card of your hand is gone, pick your foot up — but
+          your turn is over. You start playing out of it on your{' '}
+          <B>next</B> turn.
+        </P>
+        <P>
+          Unless you <B>play right into your foot</B>: get rid of every card
+          in your hand onto the table with nothing left to discard, and you
+          pick the foot up and carry straight on in the same turn. It is the
+          best thing that can happen to you all night.
         </P>
 
         <Section>GOING OUT</Section>
         <P>
-          Going out ends the round for everybody. To do it you must be in your
-          foot with every card played, and most tables require your
-          partnership to have at least <B>one clean book and one dirty
-          book</B> first. It is worth{' '}
+          Going out ends the round for everybody. Your partnership needs{' '}
+          <B>two clean books and two dirty books</B> on the table before you
+          can, and going out is worth{' '}
           {r.goOutEnabled ? <B>+{r.goOut}</B> : 'nothing at this table'}.
+        </P>
+        <P>
+          You do not have to have reached your foot to do it — but everything
+          still sitting in a hand or a foot when the round ends counts against
+          whoever is holding it. A red three buried in a foot nobody got to
+          is <B>{r.redThree}</B> that never saw the table, which is why going
+          out early can be worth more than the bonus.
         </P>
 
         <Section>THREES</Section>

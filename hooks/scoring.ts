@@ -70,6 +70,17 @@ export interface RuleSet {
    * players' heads where it always has.
    */
   cardValues: CardValueRow[];
+
+  /**
+   * How many decks are shuffled together. Like `cardValues`, this is never
+   * read by any calculation — the app scores what you tell it was on the
+   * table and does not care where the cards came from. It exists because
+   * deck count is a real house rule that varies (four here, five elsewhere,
+   * often one per player plus one) and How to Play has to tell a novice
+   * something specific when they sit down. Vague beats wrong, but specific
+   * beats both, and this is the screen where it is cheap to be specific.
+   */
+  decks: number;
 }
 
 export const DEFAULT_RULES: RuleSet = {
@@ -81,6 +92,7 @@ export const DEFAULT_RULES: RuleSet = {
   perfectDeal: 100,
   goOut: 100,
   goOutEnabled: true,
+  decks: 4,
   cardValues: [
     { label: 'Joker', value: 50 },
     { label: 'Deuce', value: 20 },

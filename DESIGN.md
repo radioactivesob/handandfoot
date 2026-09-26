@@ -72,6 +72,7 @@ As played by the family, and the defaults the app ships with:
 | Rule | Value |
 |---|---|
 | Players | 4, in two fixed partnerships |
+| Decks | 4, jokers included |
 | Rounds | 4 |
 | Round minimums | 60 / 90 / 120 / 150 |
 | Clean book (no wilds, red on top) | +500 |
@@ -521,13 +522,32 @@ with a fifth minimum cell. It reloads on focus for the same reason — the page
 links out to House Rules, and coming back to stale numbers would make a liar
 of its own closing note.
 
-What is *not* configurable is the procedure — draw two, meld, discard one;
-seven to a book; wilds never outnumbering naturals. Hand and Foot varies
-wildly house to house and the app has no opinion on any of it, so those
-sections state the common form, the foot and go-out sections say out loud
-that houses differ, and the closing note points at House Rules. **The
-procedural text has not been checked against how the family actually plays**
-— worth one read-through by someone at the table.
+**The procedural text was checked at the table** (Sept 26) and three things
+were wrong, all of them the kind of thing only a player would catch:
+
+- **Four decks, not five.** This became a rule rather than a phrase. `decks`
+  joins `RuleSet` alongside `cardValues` as a field no calculation ever
+  reads — it exists so How to Play can name a number instead of hedging
+  "four or five". Deck count is a real house rule that varies, House Rules
+  is where house rules live, and `hydrateRules` already merges stored rules
+  over the defaults, so existing installs pick up `decks: 4` on upgrade with
+  no migration. Verified against a storage file that genuinely lacked the
+  field.
+- **The foot is not free.** Empty your hand and you pick the foot up, but
+  your turn ends — you play out of it next turn. The exception is
+  *playing right into your foot*: every card in your hand onto the table
+  with nothing left to discard, and you carry straight on in the same turn.
+- **Going out takes two clean books and two dirty**, not one and one. And
+  you need not have reached your foot to do it — but everything left in a
+  hand or foot counts against its holder, so a red three buried in an
+  unplayed foot is −500 that never saw the table.
+
+Confirmed as written: draw two and discard one, wilds never outnumbering
+naturals, and seven cards to a book.
+
+Still not configurable, and still stated as the common form: the draw and
+discard procedure itself, and the meld composition rule. Hand and Foot
+varies wildly house to house and the app has no opinion on any of it.
 
 ## Open items
 
